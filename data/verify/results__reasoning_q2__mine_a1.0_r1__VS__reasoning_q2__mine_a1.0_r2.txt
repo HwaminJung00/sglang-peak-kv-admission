@@ -1,0 +1,33 @@
+$ python -m bench.verify results/reasoning_q2__mine_a1.0_r1.json results/reasoning_q2__mine_a1.0_r2.json
+비교 대상   : 120건  (test 에 없는 요청: 0건)
+완전 일치   : 85건  (70.8%)
+불일치      : 35건  (그중 앞 32자 이내에서 갈라진 것 0건 <- 이건 부동소수점 노이즈가 아니라 버그다)
+
+가장 이른 불일치 5건:
+
+  reason-00066: 앞 316자 동일 (기준 출력의 1%)
+    ref : ...istributed computing or data processing.>>> The user wants a forecast of key ledger inventory snapshot 
+    test: ...istributed computing or data processing.>>>
+
+First, I need to parse the query. The user is probably loo
+
+  reason-00029: 앞 361자 동일 (기준 출력의 2%)
+    ref : ...if there's a pattern or a common theme. >>>Terms like "inventory settlement," "quantization," "retrieva
+    test: ...if there's a pattern or a common theme. >>>Words like "inventory settlement," "quantization," "preempti
+
+  reason-00119: 앞 701자 동일 (기준 출력의 3%)
+    ref : ...eemption," "replication," "logistics," ">>>scheduler," "admission," "forecast," "corpus," "token retrie
+    test: ...eemption," "replication," "logistics," ">>>corpus," "kernel," "snapshot," "prefill," "cache," "policy,"
+
+  reason-00065: 앞 387자 동일 (기준 출력의 3%)
+    ref : ...orrect answer based on the context given>>>.
+
+First, I need to understand what the question is. The use
+    test: ...orrect answer based on the context given>>>, but the user hasn't provided the actual question yet. Wait
+
+  reason-00008: 앞 250자 동일 (기준 출력의 4%)
+    ref : ... things like throughput, normalization, >>>scheduling, eviction, memory, pipeline, etc. They mentioned 
+    test: ... things like throughput, normalization, >>>eviction, scheduling, memory, pipeline, etc. They mentioned 
+
+=== FAIL (기준 95.0%) ===
+(exit code 1)

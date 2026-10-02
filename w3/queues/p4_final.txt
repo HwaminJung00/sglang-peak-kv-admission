@@ -1,0 +1,9 @@
+# P4 — 최종 3-bar (q2). r1 은 P2/P3 의 같은 조건 실행을 쓴다. α*=1.0, N*=40
+# r2: ablated → mine → default
+traces/reasoning_q2.jsonl results ablated_r2 --chunked-prefill-size -1
+traces/reasoning_q2.jsonl results mine_a1.0_r2 --enable-peak-kv-reservation --peak-kv-reserve-ratio 1.0
+traces/reasoning_q2.jsonl results default_r2
+# r3: mine → default → ablated
+traces/reasoning_q2.jsonl results mine_a1.0_r3 --enable-peak-kv-reservation --peak-kv-reserve-ratio 1.0
+traces/reasoning_q2.jsonl results default_r3
+traces/reasoning_q2.jsonl results ablated_r3 --chunked-prefill-size -1

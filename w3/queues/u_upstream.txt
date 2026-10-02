@@ -1,0 +1,12 @@
+# U — 순정 SGLang 0.5.18 (패치 적용 전에만 실행한다)
+# P1 게이트: deterministic + triton 으로 같은 조건 2회 → 순정끼리 verify 가 PASS 하는가
+traces/reasoning_q2.jsonl results/det upstream_r1 --enable-deterministic-inference --attention-backend triton
+traces/reasoning_q2.jsonl results/det upstream_r2 --enable-deterministic-inference --attention-backend triton
+# 2.1 베이스라인: 기본 trace(qps 0.35) 순정 3회
+traces/reasoning.jsonl results upstream_r1
+traces/reasoning.jsonl results upstream_r2
+traces/reasoning.jsonl results upstream_r3
+# 플래그 OFF 성능 동일성 기준: q2 순정 1회
+traces/reasoning_q2.jsonl results upstream_r1
+# 정확성 기준: 선점이 없는 결정론 순정 실행 (q0.2 — 프롬프트·길이는 q2 와 같고 도착만 느리다)
+traces/reasoning_q0.2.jsonl results/det upstream_r1 --enable-deterministic-inference --attention-backend triton

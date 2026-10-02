@@ -1,0 +1,551 @@
+[2026-09-13 15:03:02] 큐 시작: w3/queues/u_upstream.txt
+[2026-09-13 15:03:02] === reasoning_q2__upstream_r1  flags: --enable-deterministic-inference --attention-backend triton ===
+트레이스=reasoning  요청수=120  세션수=120  연쇄요청=0  도착구간=56.0s  계획출력토큰=337433
+워밍업: 3 요청
+  ... 3/3 완료 (0s)
+재생 시작 -> http://127.0.0.1:30000
+  ... 120/120 완료 (565s)
+저장 완료: results/det/reasoning_q2__upstream_r1.json  (기록 120건, 에러 0건)
+[2026-09-13 15:13:39] === reasoning_q2__upstream_r1 끝: OK (서버 기동 69s, 재생 568s) ===
+w3/run_one.sh: line 64: 25829 Killed                  python -m sglang.launch_server "${COMMON[@]}" "${EXTRA[@]}" > "$SLOG" 2>&1
+[2026-09-13 15:13:44] rc=0 results/det/reasoning_q2__upstream_r1.json
+[2026-09-13 15:13:44] === reasoning_q2__upstream_r2  flags: --enable-deterministic-inference --attention-backend triton ===
+트레이스=reasoning  요청수=120  세션수=120  연쇄요청=0  도착구간=56.0s  계획출력토큰=337433
+워밍업: 3 요청
+  ... 3/3 완료 (0s)
+재생 시작 -> http://127.0.0.1:30000
+  ... 120/120 완료 (565s)
+저장 완료: results/det/reasoning_q2__upstream_r2.json  (기록 120건, 에러 0건)
+[2026-09-13 15:23:45] === reasoning_q2__upstream_r2 끝: OK (서버 기동 33s, 재생 567s) ===
+w3/run_one.sh: line 64: 26947 Killed                  python -m sglang.launch_server "${COMMON[@]}" "${EXTRA[@]}" > "$SLOG" 2>&1
+[2026-09-13 15:23:53] rc=0 results/det/reasoning_q2__upstream_r2.json
+[2026-09-13 15:23:53] === reasoning__upstream_r1  flags: (없음) ===
+트레이스=reasoning  요청수=120  세션수=120  연쇄요청=0  도착구간=319.7s  계획출력토큰=337433
+워밍업: 3 요청
+  ... 3/3 완료 (0s)
+재생 시작 -> http://127.0.0.1:30000
+  ... 120/120 완료 (397s)
+저장 완료: results/reasoning__upstream_r1.json  (기록 120건, 에러 0건)
+[2026-09-13 15:31:06] === reasoning__upstream_r1 끝: OK (서버 기동 33s, 재생 400s) ===
+w3/run_one.sh: line 64: 27685 Killed                  python -m sglang.launch_server "${COMMON[@]}" "${EXTRA[@]}" > "$SLOG" 2>&1
+[2026-09-13 15:31:13] rc=0 results/reasoning__upstream_r1.json
+[2026-09-13 15:31:13] === reasoning__upstream_r2  flags: (없음) ===
+트레이스=reasoning  요청수=120  세션수=120  연쇄요청=0  도착구간=319.7s  계획출력토큰=337433
+워밍업: 3 요청
+  ... 3/3 완료 (0s)
+재생 시작 -> http://127.0.0.1:30000
+  ... 120/120 완료 (397s)
+저장 완료: results/reasoning__upstream_r2.json  (기록 120건, 에러 0건)
+[2026-09-13 15:38:25] === reasoning__upstream_r2 끝: OK (서버 기동 32s, 재생 399s) ===
+w3/run_one.sh: line 64: 28295 Killed                  python -m sglang.launch_server "${COMMON[@]}" "${EXTRA[@]}" > "$SLOG" 2>&1
+[2026-09-13 15:38:31] rc=0 results/reasoning__upstream_r2.json
+[2026-09-13 15:38:31] === reasoning__upstream_r3  flags: (없음) ===
+트레이스=reasoning  요청수=120  세션수=120  연쇄요청=0  도착구간=319.7s  계획출력토큰=337433
+워밍업: 3 요청
+  ... 3/3 완료 (0s)
+재생 시작 -> http://127.0.0.1:30000
+  ... 120/120 완료 (397s)
+저장 완료: results/reasoning__upstream_r3.json  (기록 120건, 에러 0건)
+[2026-09-13 15:45:40] === reasoning__upstream_r3 끝: OK (서버 기동 29s, 재생 400s) ===
+w3/run_one.sh: line 64: 28809 Killed                  python -m sglang.launch_server "${COMMON[@]}" "${EXTRA[@]}" > "$SLOG" 2>&1
+[2026-09-13 15:45:46] rc=0 results/reasoning__upstream_r3.json
+[2026-09-13 15:45:46] === reasoning_q2__upstream_r1  flags: (없음) ===
+트레이스=reasoning  요청수=120  세션수=120  연쇄요청=0  도착구간=56.0s  계획출력토큰=337433
+워밍업: 3 요청
+  ... 3/3 완료 (0s)
+재생 시작 -> http://127.0.0.1:30000
+  ... 120/120 완료 (286s)
+저장 완료: results/reasoning_q2__upstream_r1.json  (기록 120건, 에러 0건)
+[2026-09-13 15:51:05] === reasoning_q2__upstream_r1 끝: OK (서버 기동 30s, 재생 289s) ===
+w3/run_one.sh: line 64: 29310 Killed                  python -m sglang.launch_server "${COMMON[@]}" "${EXTRA[@]}" > "$SLOG" 2>&1
+[2026-09-13 15:51:12] rc=0 results/reasoning_q2__upstream_r1.json
+[2026-09-13 15:51:12] === reasoning_q0.2__upstream_r1  flags: --enable-deterministic-inference --attention-backend triton ===
+트레이스=reasoning  요청수=120  세션수=120  연쇄요청=0  도착구간=559.6s  계획출력토큰=337433
+워밍업: 3 요청
+  ... 3/3 완료 (0s)
+재생 시작 -> http://127.0.0.1:30000
+  ... 120/120 완료 (762s)
+저장 완료: results/det/reasoning_q0.2__upstream_r1.json  (기록 120건, 에러 0건)
+[2026-09-13 16:04:29] === reasoning_q0.2__upstream_r1 끝: OK (서버 기동 31s, 재생 765s) ===
+w3/run_one.sh: line 64: 29748 Killed                  python -m sglang.launch_server "${COMMON[@]}" "${EXTRA[@]}" > "$SLOG" 2>&1
+[2026-09-13 16:04:35] rc=0 results/det/reasoning_q0.2__upstream_r1.json
+[2026-09-13 16:04:35] 큐 끝: w3/queues/u_upstream.txt
+[2026-09-13 16:04:43] chain1: upstream 큐 끝 → 패치 적용
+[2026-09-13 16:04:55] chain1: 패치 적용·스모크 OK
+[2026-09-13 16:04:55] 큐 시작: w3/queues/p2_explore.txt
+[2026-09-13 16:04:55] === reasoning_q2__default_r1  flags: (없음) ===
+트레이스=reasoning  요청수=120  세션수=120  연쇄요청=0  도착구간=56.0s  계획출력토큰=337433
+워밍업: 3 요청
+  ... 3/3 완료 (0s)
+재생 시작 -> http://127.0.0.1:30000
+  ... 120/120 완료 (286s)
+저장 완료: results/reasoning_q2__default_r1.json  (기록 120건, 에러 0건)
+[2026-09-13 16:10:13] === reasoning_q2__default_r1 끝: OK (서버 기동 29s, 재생 289s) ===
+w3/run_one.sh: line 64: 30489 Killed                  python -m sglang.launch_server "${COMMON[@]}" "${EXTRA[@]}" > "$SLOG" 2>&1
+[2026-09-13 16:10:21] rc=0 results/reasoning_q2__default_r1.json
+[2026-09-13 16:10:21] === reasoning_q2__mine_a1.0_r1  flags: --enable-peak-kv-reservation --peak-kv-reserve-ratio 1.0 ===
+트레이스=reasoning  요청수=120  세션수=120  연쇄요청=0  도착구간=56.0s  계획출력토큰=337433
+워밍업: 3 요청
+  ... 3/3 완료 (0s)
+재생 시작 -> http://127.0.0.1:30000
+  ... 120/120 완료 (274s)
+저장 완료: results/reasoning_q2__mine_a1.0_r1.json  (기록 120건, 에러 0건)
+[2026-09-13 16:15:27] === reasoning_q2__mine_a1.0_r1 끝: OK (서버 기동 29s, 재생 277s) ===
+w3/run_one.sh: line 64: 30983 Killed                  python -m sglang.launch_server "${COMMON[@]}" "${EXTRA[@]}" > "$SLOG" 2>&1
+[2026-09-13 16:15:32] rc=0 results/reasoning_q2__mine_a1.0_r1.json
+[2026-09-13 16:15:32] === reasoning_q2__mine_a0.5_r1  flags: --enable-peak-kv-reservation --peak-kv-reserve-ratio 0.5 ===
+트레이스=reasoning  요청수=120  세션수=120  연쇄요청=0  도착구간=56.0s  계획출력토큰=337433
+워밍업: 3 요청
+  ... 3/3 완료 (0s)
+재생 시작 -> http://127.0.0.1:30000
+  ... 120/120 완료 (286s)
+저장 완료: results/reasoning_q2__mine_a0.5_r1.json  (기록 120건, 에러 0건)
+[2026-09-13 16:20:50] === reasoning_q2__mine_a0.5_r1 끝: OK (서버 기동 29s, 재생 289s) ===
+w3/run_one.sh: line 64: 31381 Killed                  python -m sglang.launch_server "${COMMON[@]}" "${EXTRA[@]}" > "$SLOG" 2>&1
+[2026-09-13 16:20:57] rc=0 results/reasoning_q2__mine_a0.5_r1.json
+[2026-09-13 16:20:57] === reasoning_q2__noradix_r1  flags: --disable-radix-cache ===
+트레이스=reasoning  요청수=120  세션수=120  연쇄요청=0  도착구간=56.0s  계획출력토큰=337433
+워밍업: 3 요청
+  ... 3/3 완료 (0s)
+재생 시작 -> http://127.0.0.1:30000
+  ... 120/120 완료 (276s)
+저장 완료: results/reasoning_q2__noradix_r1.json  (기록 120건, 에러 0건)
+[2026-09-13 16:26:06] === reasoning_q2__noradix_r1 끝: OK (서버 기동 29s, 재생 279s) ===
+w3/run_one.sh: line 64: 31795 Killed                  python -m sglang.launch_server "${COMMON[@]}" "${EXTRA[@]}" > "$SLOG" 2>&1
+[2026-09-13 16:26:14] rc=0 results/reasoning_q2__noradix_r1.json
+[2026-09-13 16:26:14] === reasoning_q2__tuned_n32_r1  flags: --max-running-requests 32 ===
+트레이스=reasoning  요청수=120  세션수=120  연쇄요청=0  도착구간=56.0s  계획출력토큰=337433
+워밍업: 3 요청
+  ... 3/3 완료 (0s)
+재생 시작 -> http://127.0.0.1:30000
+  ... 120/120 완료 (295s)
+저장 완료: results/reasoning_q2__tuned_n32_r1.json  (기록 120건, 에러 0건)
+[2026-09-13 16:31:41] === reasoning_q2__tuned_n32_r1 끝: OK (서버 기동 29s, 재생 298s) ===
+w3/run_one.sh: line 64: 32180 Killed                  python -m sglang.launch_server "${COMMON[@]}" "${EXTRA[@]}" > "$SLOG" 2>&1
+[2026-09-13 16:31:50] rc=0 results/reasoning_q2__tuned_n32_r1.json
+[2026-09-13 16:31:50] === reasoning_q2__cap65k_r1  flags: --max-total-tokens 65536 ===
+트레이스=reasoning  요청수=120  세션수=120  연쇄요청=0  도착구간=56.0s  계획출력토큰=337433
+워밍업: 3 요청
+  ... 3/3 완료 (0s)
+재생 시작 -> http://127.0.0.1:30000
+  ... 120/120 완료 (306s)
+저장 완료: results/reasoning_q2__cap65k_r1.json  (기록 120건, 에러 0건)
+[2026-09-13 16:37:29] === reasoning_q2__cap65k_r1 끝: OK (서버 기동 29s, 재생 309s) ===
+w3/run_one.sh: line 64: 32820 Killed                  python -m sglang.launch_server "${COMMON[@]}" "${EXTRA[@]}" > "$SLOG" 2>&1
+[2026-09-13 16:37:37] rc=0 results/reasoning_q2__cap65k_r1.json
+[2026-09-13 16:37:37] === reasoning_q2__ablated_r1  flags: --chunked-prefill-size -1 ===
+트레이스=reasoning  요청수=120  세션수=120  연쇄요청=0  도착구간=56.0s  계획출력토큰=337433
+워밍업: 3 요청
+  ... 3/3 완료 (0s)
+재생 시작 -> http://127.0.0.1:30000
+  ... 120/120 완료 (287s)
+저장 완료: results/reasoning_q2__ablated_r1.json  (기록 120건, 에러 0건)
+[2026-09-13 16:42:52] === reasoning_q2__ablated_r1 끝: OK (서버 기동 25s, 재생 290s) ===
+w3/run_one.sh: line 64: 33212 Killed                  python -m sglang.launch_server "${COMMON[@]}" "${EXTRA[@]}" > "$SLOG" 2>&1
+[2026-09-13 16:42:59] rc=0 results/reasoning_q2__ablated_r1.json
+[2026-09-13 16:42:59] 큐 끝: w3/queues/p2_explore.txt
+[2026-09-13 16:42:59] 큐 시작: w3/queues/p3_pareto.txt
+[2026-09-13 16:42:59] === reasoning_q2__mine_a0.75_r1  flags: --enable-peak-kv-reservation --peak-kv-reserve-ratio 0.75 ===
+트레이스=reasoning  요청수=120  세션수=120  연쇄요청=0  도착구간=56.0s  계획출력토큰=337433
+워밍업: 3 요청
+  ... 3/3 완료 (0s)
+재생 시작 -> http://127.0.0.1:30000
+  ... 120/120 완료 (286s)
+저장 완료: results/reasoning_q2__mine_a0.75_r1.json  (기록 120건, 에러 0건)
+[2026-09-13 16:48:17] === reasoning_q2__mine_a0.75_r1 끝: OK (서버 기동 29s, 재생 289s) ===
+w3/run_one.sh: line 64: 33936 Killed                  python -m sglang.launch_server "${COMMON[@]}" "${EXTRA[@]}" > "$SLOG" 2>&1
+[2026-09-13 16:48:26] rc=0 results/reasoning_q2__mine_a0.75_r1.json
+[2026-09-13 16:48:26] === reasoning_q2__mine_a0.9_r1  flags: --enable-peak-kv-reservation --peak-kv-reserve-ratio 0.9 ===
+트레이스=reasoning  요청수=120  세션수=120  연쇄요청=0  도착구간=56.0s  계획출력토큰=337433
+워밍업: 3 요청
+  ... 3/3 완료 (0s)
+재생 시작 -> http://127.0.0.1:30000
+  ... 120/120 완료 (277s)
+저장 완료: results/reasoning_q2__mine_a0.9_r1.json  (기록 120건, 에러 0건)
+[2026-09-13 16:53:35] === reasoning_q2__mine_a0.9_r1 끝: OK (서버 기동 29s, 재생 280s) ===
+w3/run_one.sh: line 64: 34340 Killed                  python -m sglang.launch_server "${COMMON[@]}" "${EXTRA[@]}" > "$SLOG" 2>&1
+[2026-09-13 16:53:42] rc=0 results/reasoning_q2__mine_a0.9_r1.json
+[2026-09-13 16:53:42] === reasoning_q2__mine_a0.6_r1  flags: --enable-peak-kv-reservation --peak-kv-reserve-ratio 0.6 ===
+트레이스=reasoning  요청수=120  세션수=120  연쇄요청=0  도착구간=56.0s  계획출력토큰=337433
+워밍업: 3 요청
+  ... 3/3 완료 (0s)
+재생 시작 -> http://127.0.0.1:30000
+  ... 120/120 완료 (287s)
+저장 완료: results/reasoning_q2__mine_a0.6_r1.json  (기록 120건, 에러 0건)
+[2026-09-13 16:59:01] === reasoning_q2__mine_a0.6_r1 끝: OK (서버 기동 29s, 재생 290s) ===
+w3/run_one.sh: line 64: 34741 Killed                  python -m sglang.launch_server "${COMMON[@]}" "${EXTRA[@]}" > "$SLOG" 2>&1
+[2026-09-13 16:59:09] rc=0 results/reasoning_q2__mine_a0.6_r1.json
+[2026-09-13 16:59:09] === reasoning_q2__tuned_n24_r1  flags: --max-running-requests 24 ===
+트레이스=reasoning  요청수=120  세션수=120  연쇄요청=0  도착구간=56.0s  계획출력토큰=337433
+워밍업: 3 요청
+  ... 3/3 완료 (0s)
+재생 시작 -> http://127.0.0.1:30000
+  ... 120/120 완료 (315s)
+저장 완료: results/reasoning_q2__tuned_n24_r1.json  (기록 120건, 에러 0건)
+[2026-09-13 17:04:56] === reasoning_q2__tuned_n24_r1 끝: OK (서버 기동 29s, 재생 318s) ===
+w3/run_one.sh: line 64: 35153 Killed                  python -m sglang.launch_server "${COMMON[@]}" "${EXTRA[@]}" > "$SLOG" 2>&1
+[2026-09-13 17:05:00] rc=0 results/reasoning_q2__tuned_n24_r1.json
+[2026-09-13 17:05:00] === reasoning_q2__tuned_n40_r1  flags: --max-running-requests 40 ===
+트레이스=reasoning  요청수=120  세션수=120  연쇄요청=0  도착구간=56.0s  계획출력토큰=337433
+워밍업: 3 요청
+  ... 3/3 완료 (0s)
+재생 시작 -> http://127.0.0.1:30000
+  ... 120/120 완료 (279s)
+저장 완료: results/reasoning_q2__tuned_n40_r1.json  (기록 120건, 에러 0건)
+[2026-09-13 17:10:13] === reasoning_q2__tuned_n40_r1 끝: OK (서버 기동 31s, 재생 281s) ===
+w3/run_one.sh: line 64: 35558 Killed                  python -m sglang.launch_server "${COMMON[@]}" "${EXTRA[@]}" > "$SLOG" 2>&1
+[2026-09-13 17:10:17] rc=0 results/reasoning_q2__tuned_n40_r1.json
+[2026-09-13 17:10:17] === reasoning_q2__tuned_n48_r1  flags: --max-running-requests 48 ===
+트레이스=reasoning  요청수=120  세션수=120  연쇄요청=0  도착구간=56.0s  계획출력토큰=337433
+워밍업: 3 요청
+  ... 3/3 완료 (0s)
+재생 시작 -> http://127.0.0.1:30000
+  ... 120/120 완료 (275s)
+저장 완료: results/reasoning_q2__tuned_n48_r1.json  (기록 120건, 에러 0건)
+[2026-09-13 17:15:24] === reasoning_q2__tuned_n48_r1 끝: OK (서버 기동 29s, 재생 278s) ===
+w3/run_one.sh: line 64: 35955 Killed                  python -m sglang.launch_server "${COMMON[@]}" "${EXTRA[@]}" > "$SLOG" 2>&1
+[2026-09-13 17:15:33] rc=0 results/reasoning_q2__tuned_n48_r1.json
+[2026-09-13 17:15:33] 큐 끝: w3/queues/p3_pareto.txt
+[2026-09-13 17:15:33] 큐 시작: w3/queues/p5p7_indep.txt
+[2026-09-13 17:15:33] === reasoning_q0.5__default_r1  flags: (없음) ===
+트레이스=reasoning  요청수=120  세션수=120  연쇄요청=0  도착구간=223.8s  계획출력토큰=337433
+워밍업: 3 요청
+  ... 3/3 완료 (0s)
+재생 시작 -> http://127.0.0.1:30000
+  ... 120/120 완료 (332s)
+저장 완료: results/reasoning_q0.5__default_r1.json  (기록 120건, 에러 0건)
+[2026-09-13 17:21:37] === reasoning_q0.5__default_r1 끝: OK (서버 기동 29s, 재생 335s) ===
+w3/run_one.sh: line 64: 36365 Killed                  python -m sglang.launch_server "${COMMON[@]}" "${EXTRA[@]}" > "$SLOG" 2>&1
+[2026-09-13 17:21:45] rc=0 results/reasoning_q0.5__default_r1.json
+[2026-09-13 17:21:45] === reasoning_q0.5__ablated_r1  flags: --chunked-prefill-size -1 ===
+트레이스=reasoning  요청수=120  세션수=120  연쇄요청=0  도착구간=223.8s  계획출력토큰=337433
+워밍업: 3 요청
+  ... 3/3 완료 (0s)
+재생 시작 -> http://127.0.0.1:30000
+  ... 120/120 완료 (332s)
+저장 완료: results/reasoning_q0.5__ablated_r1.json  (기록 120건, 에러 0건)
+[2026-09-13 17:27:45] === reasoning_q0.5__ablated_r1 끝: OK (서버 기동 25s, 재생 335s) ===
+w3/run_one.sh: line 64: 36786 Killed                  python -m sglang.launch_server "${COMMON[@]}" "${EXTRA[@]}" > "$SLOG" 2>&1
+[2026-09-13 17:27:52] rc=0 results/reasoning_q0.5__ablated_r1.json
+[2026-09-13 17:27:52] === reasoning_q1__default_r1  flags: (없음) ===
+트레이스=reasoning  요청수=120  세션수=120  연쇄요청=0  도착구간=111.9s  계획출력토큰=337433
+워밍업: 3 요청
+  ... 3/3 완료 (0s)
+재생 시작 -> http://127.0.0.1:30000
+  ... 120/120 완료 (284s)
+저장 완료: results/reasoning_q1__default_r1.json  (기록 120건, 에러 0건)
+[2026-09-13 17:33:08] === reasoning_q1__default_r1 끝: OK (서버 기동 29s, 재생 287s) ===
+w3/run_one.sh: line 64: 37185 Killed                  python -m sglang.launch_server "${COMMON[@]}" "${EXTRA[@]}" > "$SLOG" 2>&1
+[2026-09-13 17:33:13] rc=0 results/reasoning_q1__default_r1.json
+[2026-09-13 17:33:13] === reasoning_q1__ablated_r1  flags: --chunked-prefill-size -1 ===
+트레이스=reasoning  요청수=120  세션수=120  연쇄요청=0  도착구간=111.9s  계획출력토큰=337433
+워밍업: 3 요청
+  ... 3/3 완료 (0s)
+재생 시작 -> http://127.0.0.1:30000
+  ... 120/120 완료 (283s)
+저장 완료: results/reasoning_q1__ablated_r1.json  (기록 120건, 에러 1건)
+  !! 에러가 있다. 고치기 전에는 어떤 수치도 보고하지 말 것.
+[2026-09-13 17:38:24] === reasoning_q1__ablated_r1 끝: ERR1 (서버 기동 25s, 재생 286s) ===
+w3/run_one.sh: line 64: 37583 Killed                  python -m sglang.launch_server "${COMMON[@]}" "${EXTRA[@]}" > "$SLOG" 2>&1
+[2026-09-13 17:38:31] rc=0 results/reasoning_q1__ablated_r1.json
+[2026-09-13 17:38:31] === reasoning_q4__default_r1  flags: (없음) ===
+트레이스=reasoning  요청수=120  세션수=120  연쇄요청=0  도착구간=28.0s  계획출력토큰=337433
+워밍업: 3 요청
+  ... 3/3 완료 (0s)
+재생 시작 -> http://127.0.0.1:30000
+  ... 120/120 완료 (286s)
+저장 완료: results/reasoning_q4__default_r1.json  (기록 120건, 에러 0건)
+[2026-09-13 17:43:49] === reasoning_q4__default_r1 끝: OK (서버 기동 29s, 재생 289s) ===
+w3/run_one.sh: line 64: 37970 Killed                  python -m sglang.launch_server "${COMMON[@]}" "${EXTRA[@]}" > "$SLOG" 2>&1
+[2026-09-13 17:43:56] rc=0 results/reasoning_q4__default_r1.json
+[2026-09-13 17:43:56] === reasoning_q4__ablated_r1  flags: --chunked-prefill-size -1 ===
+트레이스=reasoning  요청수=120  세션수=120  연쇄요청=0  도착구간=28.0s  계획출력토큰=337433
+워밍업: 3 요청
+  ... 3/3 완료 (0s)
+재생 시작 -> http://127.0.0.1:30000
+  ... 120/120 완료 (285s)
+저장 완료: results/reasoning_q4__ablated_r1.json  (기록 120건, 에러 0건)
+[2026-09-13 17:49:09] === reasoning_q4__ablated_r1 끝: OK (서버 기동 25s, 재생 288s) ===
+w3/run_one.sh: line 64: 38536 Killed                  python -m sglang.launch_server "${COMMON[@]}" "${EXTRA[@]}" > "$SLOG" 2>&1
+[2026-09-13 17:49:18] rc=0 results/reasoning_q4__ablated_r1.json
+[2026-09-13 17:49:18] === reasoning__ablated_r1  flags: --chunked-prefill-size -1 ===
+트레이스=reasoning  요청수=120  세션수=120  연쇄요청=0  도착구간=319.7s  계획출력토큰=337433
+워밍업: 3 요청
+  ... 3/3 완료 (0s)
+재생 시작 -> http://127.0.0.1:30000
+  ... 120/120 완료 (397s)
+저장 완료: results/reasoning__ablated_r1.json  (기록 120건, 에러 0건)
+[2026-09-13 17:56:24] === reasoning__ablated_r1 끝: OK (서버 기동 25s, 재생 400s) ===
+w3/run_one.sh: line 64: 38927 Killed                  python -m sglang.launch_server "${COMMON[@]}" "${EXTRA[@]}" > "$SLOG" 2>&1
+[2026-09-13 17:56:31] rc=0 results/reasoning__ablated_r1.json
+[2026-09-13 17:56:31] === reasoning_q2_s0.3__default_r1  flags: (없음) ===
+트레이스=reasoning  요청수=120  세션수=120  연쇄요청=0  도착구간=56.0s  계획출력토큰=349818
+워밍업: 3 요청
+  ... 3/3 완료 (0s)
+재생 시작 -> http://127.0.0.1:30000
+  ... 120/120 완료 (242s)
+저장 완료: results/reasoning_q2_s0.3__default_r1.json  (기록 120건, 에러 0건)
+[2026-09-13 18:01:05] === reasoning_q2_s0.3__default_r1 끝: OK (서버 기동 29s, 재생 245s) ===
+w3/run_one.sh: line 64: 39336 Killed                  python -m sglang.launch_server "${COMMON[@]}" "${EXTRA[@]}" > "$SLOG" 2>&1
+[2026-09-13 18:01:11] rc=0 results/reasoning_q2_s0.3__default_r1.json
+[2026-09-13 18:01:11] === reasoning_q2_s1.0__default_r1  flags: (없음) ===
+트레이스=reasoning  요청수=120  세션수=120  연쇄요청=0  도착구간=56.0s  계획출력토큰=313441
+워밍업: 3 요청
+  ... 3/3 완료 (0s)
+재생 시작 -> http://127.0.0.1:30000
+  ... 120/120 완료 (350s)
+저장 완료: results/reasoning_q2_s1.0__default_r1.json  (기록 120건, 에러 0건)
+[2026-09-13 18:07:33] === reasoning_q2_s1.0__default_r1 끝: OK (서버 기동 29s, 재생 353s) ===
+w3/run_one.sh: line 64: 39734 Killed                  python -m sglang.launch_server "${COMMON[@]}" "${EXTRA[@]}" > "$SLOG" 2>&1
+[2026-09-13 18:07:42] rc=0 results/reasoning_q2_s1.0__default_r1.json
+[2026-09-13 18:07:42] === reasoning_q2_m1000__default_r1  flags: (없음) ===
+트레이스=reasoning  요청수=120  세션수=120  연쇄요청=0  도착구간=56.0s  계획출력토큰=112541
+워밍업: 3 요청
+  ... 3/3 완료 (0s)
+재생 시작 -> http://127.0.0.1:30000
+  ... 120/120 완료 (83s)
+저장 완료: results/reasoning_q2_m1000__default_r1.json  (기록 120건, 에러 0건)
+[2026-09-13 18:09:38] === reasoning_q2_m1000__default_r1 끝: OK (서버 기동 30s, 재생 85s) ===
+w3/run_one.sh: line 64: 40155 Killed                  python -m sglang.launch_server "${COMMON[@]}" "${EXTRA[@]}" > "$SLOG" 2>&1
+[2026-09-13 18:09:44] rc=0 results/reasoning_q2_m1000__default_r1.json
+[2026-09-13 18:09:44] === reasoning_q2__default_off_r1  flags: --enable-deterministic-inference --attention-backend triton ===
+트레이스=reasoning  요청수=120  세션수=120  연쇄요청=0  도착구간=56.0s  계획출력토큰=337433
+워밍업: 3 요청
+  ... 3/3 완료 (0s)
+재생 시작 -> http://127.0.0.1:30000
+  ... 120/120 완료 (568s)
+저장 완료: results/det/reasoning_q2__default_off_r1.json  (기록 120건, 에러 0건)
+[2026-09-13 18:19:46] === reasoning_q2__default_off_r1 끝: OK (서버 기동 31s, 재생 570s) ===
+w3/run_one.sh: line 64: 40517 Killed                  python -m sglang.launch_server "${COMMON[@]}" "${EXTRA[@]}" > "$SLOG" 2>&1
+[2026-09-13 18:19:51] rc=0 results/det/reasoning_q2__default_off_r1.json
+[2026-09-13 18:19:51] === reasoning_q0.2__default_off_r1  flags: --enable-deterministic-inference --attention-backend triton ===
+트레이스=reasoning  요청수=120  세션수=120  연쇄요청=0  도착구간=559.6s  계획출력토큰=337433
+워밍업: 3 요청
+  ... 3/3 완료 (0s)
+재생 시작 -> http://127.0.0.1:30000
+  ... 120/120 완료 (762s)
+저장 완료: results/det/reasoning_q0.2__default_off_r1.json  (기록 120건, 에러 0건)
+[2026-09-13 18:33:07] === reasoning_q0.2__default_off_r1 끝: OK (서버 기동 31s, 재생 765s) ===
+w3/run_one.sh: line 64: 40984 Killed                  python -m sglang.launch_server "${COMMON[@]}" "${EXTRA[@]}" > "$SLOG" 2>&1
+[2026-09-13 18:33:14] rc=0 results/det/reasoning_q0.2__default_off_r1.json
+[2026-09-13 18:33:14] 큐 끝: w3/queues/p5p7_indep.txt
+[2026-09-13 18:33:14] chain1: 전체 끝
+[2026-09-13 18:33:15] 큐 시작: w3/queues/p4_final.txt
+[2026-09-13 18:33:15] === reasoning_q2__ablated_r2  flags: --chunked-prefill-size -1 ===
+트레이스=reasoning  요청수=120  세션수=120  연쇄요청=0  도착구간=56.0s  계획출력토큰=337433
+워밍업: 3 요청
+  ... 3/3 완료 (0s)
+재생 시작 -> http://127.0.0.1:30000
+  ... 120/120 완료 (286s)
+저장 완료: results/reasoning_q2__ablated_r2.json  (기록 120건, 에러 0건)
+[2026-09-13 18:38:31] === reasoning_q2__ablated_r2 끝: OK (서버 기동 27s, 재생 289s) ===
+w3/run_one.sh: line 64: 41526 Killed                  python -m sglang.launch_server "${COMMON[@]}" "${EXTRA[@]}" > "$SLOG" 2>&1
+[2026-09-13 18:38:38] rc=0 results/reasoning_q2__ablated_r2.json
+[2026-09-13 18:38:38] === reasoning_q2__mine_a1.0_r2  flags: --enable-peak-kv-reservation --peak-kv-reserve-ratio 1.0 ===
+트레이스=reasoning  요청수=120  세션수=120  연쇄요청=0  도착구간=56.0s  계획출력토큰=337433
+워밍업: 3 요청
+  ... 3/3 완료 (0s)
+재생 시작 -> http://127.0.0.1:30000
+  ... 120/120 완료 (274s)
+저장 완료: results/reasoning_q2__mine_a1.0_r2.json  (기록 120건, 에러 0건)
+[2026-09-13 18:43:44] === reasoning_q2__mine_a1.0_r2 끝: OK (서버 기동 30s, 재생 276s) ===
+w3/run_one.sh: line 64: 41901 Killed                  python -m sglang.launch_server "${COMMON[@]}" "${EXTRA[@]}" > "$SLOG" 2>&1
+[2026-09-13 18:43:48] rc=0 results/reasoning_q2__mine_a1.0_r2.json
+[2026-09-13 18:43:48] === reasoning_q2__default_r2  flags: (없음) ===
+트레이스=reasoning  요청수=120  세션수=120  연쇄요청=0  도착구간=56.0s  계획출력토큰=337433
+워밍업: 3 요청
+  ... 3/3 완료 (0s)
+재생 시작 -> http://127.0.0.1:30000
+  ... 120/120 완료 (286s)
+저장 완료: results/reasoning_q2__default_r2.json  (기록 120건, 에러 0건)
+[2026-09-13 18:49:06] === reasoning_q2__default_r2 끝: OK (서버 기동 29s, 재생 289s) ===
+w3/run_one.sh: line 64: 42262 Killed                  python -m sglang.launch_server "${COMMON[@]}" "${EXTRA[@]}" > "$SLOG" 2>&1
+[2026-09-13 18:49:14] rc=0 results/reasoning_q2__default_r2.json
+[2026-09-13 18:49:14] === reasoning_q2__mine_a1.0_r3  flags: --enable-peak-kv-reservation --peak-kv-reserve-ratio 1.0 ===
+트레이스=reasoning  요청수=120  세션수=120  연쇄요청=0  도착구간=56.0s  계획출력토큰=337433
+워밍업: 3 요청
+  ... 3/3 완료 (0s)
+재생 시작 -> http://127.0.0.1:30000
+  ... 120/120 완료 (274s)
+저장 완료: results/reasoning_q2__mine_a1.0_r3.json  (기록 120건, 에러 0건)
+[2026-09-13 18:54:20] === reasoning_q2__mine_a1.0_r3 끝: OK (서버 기동 29s, 재생 277s) ===
+w3/run_one.sh: line 64: 42621 Killed                  python -m sglang.launch_server "${COMMON[@]}" "${EXTRA[@]}" > "$SLOG" 2>&1
+[2026-09-13 18:54:25] rc=0 results/reasoning_q2__mine_a1.0_r3.json
+[2026-09-13 18:54:25] === reasoning_q2__default_r3  flags: (없음) ===
+트레이스=reasoning  요청수=120  세션수=120  연쇄요청=0  도착구간=56.0s  계획출력토큰=337433
+워밍업: 3 요청
+  ... 3/3 완료 (0s)
+재생 시작 -> http://127.0.0.1:30000
+  ... 120/120 완료 (286s)
+저장 완료: results/reasoning_q2__default_r3.json  (기록 120건, 에러 0건)
+[2026-09-13 18:59:43] === reasoning_q2__default_r3 끝: OK (서버 기동 29s, 재생 289s) ===
+w3/run_one.sh: line 64: 42978 Killed                  python -m sglang.launch_server "${COMMON[@]}" "${EXTRA[@]}" > "$SLOG" 2>&1
+[2026-09-13 18:59:51] rc=0 results/reasoning_q2__default_r3.json
+[2026-09-13 18:59:51] === reasoning_q2__ablated_r3  flags: --chunked-prefill-size -1 ===
+트레이스=reasoning  요청수=120  세션수=120  연쇄요청=0  도착구간=56.0s  계획출력토큰=337433
+워밍업: 3 요청
+  ... 3/3 완료 (0s)
+재생 시작 -> http://127.0.0.1:30000
+  ... 120/120 완료 (286s)
+저장 완료: results/reasoning_q2__ablated_r3.json  (기록 120건, 에러 0건)
+[2026-09-13 19:05:05] === reasoning_q2__ablated_r3 끝: OK (서버 기동 25s, 재생 289s) ===
+w3/run_one.sh: line 64: 43338 Killed                  python -m sglang.launch_server "${COMMON[@]}" "${EXTRA[@]}" > "$SLOG" 2>&1
+[2026-09-13 19:05:13] rc=0 results/reasoning_q2__ablated_r3.json
+[2026-09-13 19:05:13] 큐 끝: w3/queues/p4_final.txt
+[2026-09-13 19:05:13] 큐 시작: w3/queues/p5p7_mine.txt
+[2026-09-13 19:05:13] === reasoning__mine_a1.0_r1  flags: --enable-peak-kv-reservation --peak-kv-reserve-ratio 1.0 ===
+트레이스=reasoning  요청수=120  세션수=120  연쇄요청=0  도착구간=319.7s  계획출력토큰=337433
+워밍업: 3 요청
+  ... 3/3 완료 (0s)
+재생 시작 -> http://127.0.0.1:30000
+  ... 120/120 완료 (397s)
+저장 완료: results/reasoning__mine_a1.0_r1.json  (기록 120건, 에러 0건)
+[2026-09-13 19:12:23] === reasoning__mine_a1.0_r1 끝: OK (서버 기동 29s, 재생 400s) ===
+w3/run_one.sh: line 64: 43704 Killed                  python -m sglang.launch_server "${COMMON[@]}" "${EXTRA[@]}" > "$SLOG" 2>&1
+[2026-09-13 19:12:29] rc=0 results/reasoning__mine_a1.0_r1.json
+[2026-09-13 19:12:29] === reasoning_q0.5__mine_a1.0_r1  flags: --enable-peak-kv-reservation --peak-kv-reserve-ratio 1.0 ===
+트레이스=reasoning  요청수=120  세션수=120  연쇄요청=0  도착구간=223.8s  계획출력토큰=337433
+워밍업: 3 요청
+  ... 3/3 완료 (0s)
+재생 시작 -> http://127.0.0.1:30000
+  ... 120/120 완료 (332s)
+저장 완료: results/reasoning_q0.5__mine_a1.0_r1.json  (기록 120건, 에러 0건)
+[2026-09-13 19:18:33] === reasoning_q0.5__mine_a1.0_r1 끝: OK (서버 기동 29s, 재생 335s) ===
+w3/run_one.sh: line 64: 44208 Killed                  python -m sglang.launch_server "${COMMON[@]}" "${EXTRA[@]}" > "$SLOG" 2>&1
+[2026-09-13 19:18:39] rc=0 results/reasoning_q0.5__mine_a1.0_r1.json
+[2026-09-13 19:18:39] === reasoning_q1__mine_a1.0_r1  flags: --enable-peak-kv-reservation --peak-kv-reserve-ratio 1.0 ===
+트레이스=reasoning  요청수=120  세션수=120  연쇄요청=0  도착구간=111.9s  계획출력토큰=337433
+워밍업: 3 요청
+  ... 3/3 완료 (0s)
+재생 시작 -> http://127.0.0.1:30000
+  ... 120/120 완료 (286s)
+저장 완료: results/reasoning_q1__mine_a1.0_r1.json  (기록 120건, 에러 0건)
+[2026-09-13 19:23:57] === reasoning_q1__mine_a1.0_r1 끝: OK (서버 기동 29s, 재생 289s) ===
+w3/run_one.sh: line 64: 44570 Killed                  python -m sglang.launch_server "${COMMON[@]}" "${EXTRA[@]}" > "$SLOG" 2>&1
+[2026-09-13 19:24:05] rc=0 results/reasoning_q1__mine_a1.0_r1.json
+[2026-09-13 19:24:05] === reasoning_q4__mine_a1.0_r1  flags: --enable-peak-kv-reservation --peak-kv-reserve-ratio 1.0 ===
+트레이스=reasoning  요청수=120  세션수=120  연쇄요청=0  도착구간=28.0s  계획출력토큰=337433
+워밍업: 3 요청
+  ... 3/3 완료 (0s)
+재생 시작 -> http://127.0.0.1:30000
+  ... 120/120 완료 (268s)
+저장 완료: results/reasoning_q4__mine_a1.0_r1.json  (기록 120건, 에러 0건)
+[2026-09-13 19:29:05] === reasoning_q4__mine_a1.0_r1 끝: OK (서버 기동 29s, 재생 270s) ===
+w3/run_one.sh: line 64: 44931 Killed                  python -m sglang.launch_server "${COMMON[@]}" "${EXTRA[@]}" > "$SLOG" 2>&1
+[2026-09-13 19:29:11] rc=0 results/reasoning_q4__mine_a1.0_r1.json
+[2026-09-13 19:29:11] === reasoning_q2_s0.3__mine_a1.0_r1  flags: --enable-peak-kv-reservation --peak-kv-reserve-ratio 1.0 ===
+트레이스=reasoning  요청수=120  세션수=120  연쇄요청=0  도착구간=56.0s  계획출력토큰=349818
+워밍업: 3 요청
+  ... 3/3 완료 (0s)
+재생 시작 -> http://127.0.0.1:30000
+  ... 120/120 완료 (242s)
+저장 완료: results/reasoning_q2_s0.3__mine_a1.0_r1.json  (기록 120건, 에러 0건)
+[2026-09-13 19:33:45] === reasoning_q2_s0.3__mine_a1.0_r1 끝: OK (서버 기동 29s, 재생 245s) ===
+w3/run_one.sh: line 64: 45290 Killed                  python -m sglang.launch_server "${COMMON[@]}" "${EXTRA[@]}" > "$SLOG" 2>&1
+[2026-09-13 19:33:52] rc=0 results/reasoning_q2_s0.3__mine_a1.0_r1.json
+[2026-09-13 19:33:52] === reasoning_q2_s1.0__mine_a1.0_r1  flags: --enable-peak-kv-reservation --peak-kv-reserve-ratio 1.0 ===
+트레이스=reasoning  요청수=120  세션수=120  연쇄요청=0  도착구간=56.0s  계획출력토큰=313441
+워밍업: 3 요청
+  ... 3/3 완료 (0s)
+재생 시작 -> http://127.0.0.1:30000
+  ... 120/120 완료 (353s)
+저장 완료: results/reasoning_q2_s1.0__mine_a1.0_r1.json  (기록 120건, 에러 0건)
+[2026-09-13 19:40:17] === reasoning_q2_s1.0__mine_a1.0_r1 끝: OK (서버 기동 29s, 재생 356s) ===
+w3/run_one.sh: line 64: 45647 Killed                  python -m sglang.launch_server "${COMMON[@]}" "${EXTRA[@]}" > "$SLOG" 2>&1
+[2026-09-13 19:40:22] rc=0 results/reasoning_q2_s1.0__mine_a1.0_r1.json
+[2026-09-13 19:40:22] === reasoning_q2_m1000__mine_a1.0_r1  flags: --enable-peak-kv-reservation --peak-kv-reserve-ratio 1.0 ===
+트레이스=reasoning  요청수=120  세션수=120  연쇄요청=0  도착구간=56.0s  계획출력토큰=112541
+워밍업: 3 요청
+  ... 3/3 완료 (0s)
+재생 시작 -> http://127.0.0.1:30000
+  ... 120/120 완료 (83s)
+저장 완료: results/reasoning_q2_m1000__mine_a1.0_r1.json  (기록 120건, 에러 0건)
+[2026-09-13 19:42:17] === reasoning_q2_m1000__mine_a1.0_r1 끝: OK (서버 기동 29s, 재생 86s) ===
+w3/run_one.sh: line 64: 46012 Killed                  python -m sglang.launch_server "${COMMON[@]}" "${EXTRA[@]}" > "$SLOG" 2>&1
+[2026-09-13 19:42:22] rc=0 results/reasoning_q2_m1000__mine_a1.0_r1.json
+[2026-09-13 19:42:22] === reasoning_q2__mine_a1.0_r1  flags: --enable-deterministic-inference --attention-backend triton --enable-peak-kv-reservation --peak-kv-reserve-ratio 1.0 ===
+트레이스=reasoning  요청수=120  세션수=120  연쇄요청=0  도착구간=56.0s  계획출력토큰=337433
+워밍업: 3 요청
+  ... 3/3 완료 (0s)
+재생 시작 -> http://127.0.0.1:30000
+  ... 120/120 완료 (519s)
+저장 완료: results/det/reasoning_q2__mine_a1.0_r1.json  (기록 120건, 에러 0건)
+[2026-09-13 19:51:36] === reasoning_q2__mine_a1.0_r1 끝: OK (서버 기동 31s, 재생 523s) ===
+w3/run_one.sh: line 64: 46368 Killed                  python -m sglang.launch_server "${COMMON[@]}" "${EXTRA[@]}" > "$SLOG" 2>&1
+[2026-09-13 19:51:45] rc=0 results/det/reasoning_q2__mine_a1.0_r1.json
+[2026-09-13 19:51:45] === reasoning_q1__tuned_n40_r1  flags: --max-running-requests 40 ===
+트레이스=reasoning  요청수=120  세션수=120  연쇄요청=0  도착구간=111.9s  계획출력토큰=337433
+워밍업: 3 요청
+  ... 3/3 완료 (0s)
+재생 시작 -> http://127.0.0.1:30000
+  ... 120/120 완료 (290s)
+저장 완료: results/reasoning_q1__tuned_n40_r1.json  (기록 120건, 에러 0건)
+[2026-09-13 19:57:07] === reasoning_q1__tuned_n40_r1 끝: OK (서버 기동 29s, 재생 293s) ===
+w3/run_one.sh: line 64: 46757 Killed                  python -m sglang.launch_server "${COMMON[@]}" "${EXTRA[@]}" > "$SLOG" 2>&1
+[2026-09-13 19:57:16] rc=0 results/reasoning_q1__tuned_n40_r1.json
+[2026-09-13 19:57:16] === reasoning_q4__tuned_n40_r1  flags: --max-running-requests 40 ===
+트레이스=reasoning  요청수=120  세션수=120  연쇄요청=0  도착구간=28.0s  계획출력토큰=337433
+워밍업: 3 요청
+  ... 3/3 완료 (0s)
+재생 시작 -> http://127.0.0.1:30000
+  ... 120/120 완료 (272s)
+저장 완료: results/reasoning_q4__tuned_n40_r1.json  (기록 120건, 에러 0건)
+[2026-09-13 20:02:20] === reasoning_q4__tuned_n40_r1 끝: OK (서버 기동 29s, 재생 275s) ===
+w3/run_one.sh: line 64: 47248 Killed                  python -m sglang.launch_server "${COMMON[@]}" "${EXTRA[@]}" > "$SLOG" 2>&1
+[2026-09-13 20:02:27] rc=0 results/reasoning_q4__tuned_n40_r1.json
+[2026-09-13 20:02:27] === reasoning_q2_s0.3__tuned_n40_r1  flags: --max-running-requests 40 ===
+트레이스=reasoning  요청수=120  세션수=120  연쇄요청=0  도착구간=56.0s  계획출력토큰=349818
+워밍업: 3 요청
+  ... 3/3 완료 (0s)
+재생 시작 -> http://127.0.0.1:30000
+  ... 120/120 완료 (243s)
+저장 완료: results/reasoning_q2_s0.3__tuned_n40_r1.json  (기록 120건, 에러 0건)
+[2026-09-13 20:07:03] === reasoning_q2_s0.3__tuned_n40_r1 끝: OK (서버 기동 29s, 재생 246s) ===
+w3/run_one.sh: line 64: 47619 Killed                  python -m sglang.launch_server "${COMMON[@]}" "${EXTRA[@]}" > "$SLOG" 2>&1
+[2026-09-13 20:07:08] rc=0 results/reasoning_q2_s0.3__tuned_n40_r1.json
+[2026-09-13 20:07:08] === reasoning_q2_s1.0__tuned_n40_r1  flags: --max-running-requests 40 ===
+트레이스=reasoning  요청수=120  세션수=120  연쇄요청=0  도착구간=56.0s  계획출력토큰=313441
+워밍업: 3 요청
+  ... 3/3 완료 (0s)
+재생 시작 -> http://127.0.0.1:30000
+  ... 120/120 완료 (358s)
+저장 완료: results/reasoning_q2_s1.0__tuned_n40_r1.json  (기록 120건, 에러 0건)
+[2026-09-13 20:13:38] === reasoning_q2_s1.0__tuned_n40_r1 끝: OK (서버 기동 29s, 재생 360s) ===
+w3/run_one.sh: line 64: 47984 Killed                  python -m sglang.launch_server "${COMMON[@]}" "${EXTRA[@]}" > "$SLOG" 2>&1
+[2026-09-13 20:13:43] rc=0 results/reasoning_q2_s1.0__tuned_n40_r1.json
+[2026-09-13 20:13:43] === reasoning_q2_m1000__tuned_n40_r1  flags: --max-running-requests 40 ===
+트레이스=reasoning  요청수=120  세션수=120  연쇄요청=0  도착구간=56.0s  계획출력토큰=112541
+워밍업: 3 요청
+  ... 3/3 완료 (0s)
+재생 시작 -> http://127.0.0.1:30000
+  ... 120/120 완료 (83s)
+저장 완료: results/reasoning_q2_m1000__tuned_n40_r1.json  (기록 120건, 에러 0건)
+[2026-09-13 20:15:38] === reasoning_q2_m1000__tuned_n40_r1 끝: OK (서버 기동 29s, 재생 86s) ===
+w3/run_one.sh: line 64: 48360 Killed                  python -m sglang.launch_server "${COMMON[@]}" "${EXTRA[@]}" > "$SLOG" 2>&1
+[2026-09-13 20:15:43] rc=0 results/reasoning_q2_m1000__tuned_n40_r1.json
+[2026-09-13 20:15:43] === reasoning_q1__ablated_r1  flags: --chunked-prefill-size -1 ===
+트레이스=reasoning  요청수=120  세션수=120  연쇄요청=0  도착구간=111.9s  계획출력토큰=337433
+워밍업: 3 요청
+  ... 3/3 완료 (0s)
+재생 시작 -> http://127.0.0.1:30000
+  ... 120/120 완료 (285s)
+저장 완료: results/reasoning_q1__ablated_r1.json  (기록 120건, 에러 0건)
+[2026-09-13 20:20:56] === reasoning_q1__ablated_r1 끝: OK (서버 기동 25s, 재생 288s) ===
+w3/run_one.sh: line 64: 48706 Killed                  python -m sglang.launch_server "${COMMON[@]}" "${EXTRA[@]}" > "$SLOG" 2>&1
+[2026-09-13 20:21:05] rc=0 results/reasoning_q1__ablated_r1.json
+[2026-09-13 20:21:06] === reasoning_q2__mine_a1.0_p16_r1  flags: --enable-peak-kv-reservation --peak-kv-reserve-ratio 1.0 --page-size 16 ===
+트레이스=reasoning  요청수=120  세션수=120  연쇄요청=0  도착구간=56.0s  계획출력토큰=337433
+워밍업: 3 요청
+  ... 3/3 완료 (0s)
+재생 시작 -> http://127.0.0.1:30000
+  ... 120/120 완료 (274s)
+저장 완료: results/reasoning_q2__mine_a1.0_p16_r1.json  (기록 120건, 에러 0건)
+[2026-09-13 20:26:11] === reasoning_q2__mine_a1.0_p16_r1 끝: OK (서버 기동 29s, 재생 276s) ===
+w3/run_one.sh: line 64: 49075 Killed                  python -m sglang.launch_server "${COMMON[@]}" "${EXTRA[@]}" > "$SLOG" 2>&1
+[2026-09-13 20:26:16] rc=0 results/reasoning_q2__mine_a1.0_p16_r1.json
+[2026-09-13 20:26:16] 큐 끝: w3/queues/p5p7_mine.txt
+[2026-09-13 20:26:16] chain2: cross_replay default 시작
+[2026-09-13 20:35:17] chain2: cross_replay default 끝 rc=0
+[2026-09-13 20:35:22] chain2: cross_replay mine 시작 (α=1.0)
+[2026-09-13 20:44:19] chain2: cross_replay mine 끝 rc=0
+[2026-09-13 20:44:24] chain2: 전체 끝

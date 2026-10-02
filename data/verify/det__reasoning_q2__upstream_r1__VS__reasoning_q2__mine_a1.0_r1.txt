@@ -1,0 +1,39 @@
+$ python -m bench.verify results/det/reasoning_q2__upstream_r1.json results/det/reasoning_q2__mine_a1.0_r1.json
+비교 대상   : 120건  (test 에 없는 요청: 0건)
+완전 일치   : 98건  (81.7%)
+불일치      : 22건  (그중 앞 32자 이내에서 갈라진 것 0건 <- 이건 부동소수점 노이즈가 아니라 버그다)
+
+가장 이른 불일치 5건:
+
+  reason-00077: 앞 1934자 동일 (기준 출력의 9%)
+    ref : ...answer using only the provided context. >>>But the context is just the list of terms. So maybe the user
+    test: ...answer using only the provided context. >>>The context is the list of terms. But without additional inf
+
+  reason-00066: 앞 4592자 동일 (기준 출력의 11%)
+    ref : ...er is to confirm that the key terms are >>>as listed. 
+
+But the user's problem is to answer the query, 
+    test: ...er is to confirm that the key terms are >>>those listed. 
+
+But the user's problem is to answer the quer
+
+  reason-00064: 앞 5695자 동일 (기준 출력의 11%)
+    ref : ...atively, the user might be asking for a >>>term that is repeated multiple times, such as "token," "serv
+    test: ...atively, the user might be asking for a >>>specific term that is repeated multiple times, such as "toke
+
+  reason-00082: 앞 1918자 동일 (기준 출력의 12%)
+    ref : ...nce, projection, similarity. 
+
+The user >>>is probably asking about the allocation policy for query pre
+    test: ...nce, projection, similarity. 
+
+The user >>>might be asking about the allocation policy in a system that
+
+  reason-00084: 앞 3578자 동일 (기준 출력의 13%)
+    ref : ... be asking for a list of key terms or a >>>breakdown of the system's architecture.
+
+But since the user 
+    test: ... be asking for a list of key terms or a >>>categorization of the terms into different system components
+
+=== FAIL (기준 95.0%) ===
+(exit code 1)

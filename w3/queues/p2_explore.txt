@@ -1,0 +1,11 @@
+# P2 — 탐색 (q2, 패치 적용 후). 모두 1회 = 탐색 표시.
+# mine 을 앞에 둬서 패치가 실제 경로에서 동작하는지(서버 로그 'Peak-KV reservation') 먼저 확인한다.
+traces/reasoning_q2.jsonl results default_r1
+traces/reasoning_q2.jsonl results mine_a1.0_r1 --enable-peak-kv-reservation --peak-kv-reserve-ratio 1.0
+traces/reasoning_q2.jsonl results mine_a0.5_r1 --enable-peak-kv-reservation --peak-kv-reserve-ratio 0.5
+traces/reasoning_q2.jsonl results noradix_r1 --disable-radix-cache
+traces/reasoning_q2.jsonl results tuned_n32_r1 --max-running-requests 32
+# E2 용량 대조: 풀을 줄이면 선점이 늘어나는가
+traces/reasoning_q2.jsonl results cap65k_r1 --max-total-tokens 65536
+# E3 프로토콜 ablation: chunked prefill OFF
+traces/reasoning_q2.jsonl results ablated_r1 --chunked-prefill-size -1

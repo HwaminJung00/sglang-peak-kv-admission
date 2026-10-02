@@ -1,0 +1,35 @@
+$ python -m bench.verify results/det/reasoning_q2__upstream_r1.json results/det/reasoning_q2__default_off_r1.json
+비교 대상   : 120건  (test 에 없는 요청: 0건)
+완전 일치   : 106건  (88.3%)
+불일치      : 14건  (그중 앞 32자 이내에서 갈라진 것 0건 <- 이건 부동소수점 노이즈가 아니라 버그다)
+
+가장 이른 불일치 5건:
+
+  reason-00084: 앞 1870자 동일 (기준 출력의 7%)
+    ref : ...ybe the user is asking for a summary or >>>identification of the main components or relationships in th
+    test: ...ybe the user is asking for a summary or >>>key points from the document.
+
+Alternatively, maybe the user
+
+  reason-00066: 앞 3877자 동일 (기준 출력의 9%)
+    ref : ...ssistant needs to process that list and >>>answer the question. However, the user hasn't asked a specif
+    test: ...ssistant needs to process that list and >>>provide an answer. However, the user hasn't asked a specific
+
+  reason-00077: 앞 2672자 동일 (기준 출력의 12%)
+    ref : ...t of terms. But the problem is that the >>>context is just a list of terms, and the user hasn't asked a
+    test: ...t of terms. But the problem is that the >>>user hasn't actually asked a specific question. Maybe the us
+
+  reason-00082: 앞 1918자 동일 (기준 출력의 12%)
+    ref : ...nce, projection, similarity. 
+
+The user >>>is probably asking about the allocation policy for query pre
+    test: ...nce, projection, similarity. 
+
+The user >>>might be asking about the allocation policy for query preemp
+
+  reason-00097: 앞 4203자 동일 (기준 출력의 14%)
+    ref : ...to be a list of technical terms without >>>explicit explanation or structure, making it unclear how to 
+    test: ...to be a list of technical terms without >>>clear explanation or structure, making it impossible to deri
+
+=== FAIL (기준 95.0%) ===
+(exit code 1)

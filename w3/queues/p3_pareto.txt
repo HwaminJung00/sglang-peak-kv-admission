@@ -1,0 +1,9 @@
+# P3 — α · N 파레토 (q2). P2 와 겹치는 점(α=1.0, 0.5 / N=32)은 제외.
+# 계획(plan.md)은 α ∈ {0.25, 0.5, 1.0} 이었으나, α=0.5 에서 입장 지연이 0회(= default 와 같은 궤적)였다.
+# 거절 조건은 α 에 대해 단조(α 가 작을수록 약함)라 α=0.25 도 0회가 자명 → 0.5–1.0 구간을 촘촘히 본다.
+traces/reasoning_q2.jsonl results mine_a0.75_r1 --enable-peak-kv-reservation --peak-kv-reserve-ratio 0.75
+traces/reasoning_q2.jsonl results mine_a0.9_r1 --enable-peak-kv-reservation --peak-kv-reserve-ratio 0.9
+traces/reasoning_q2.jsonl results mine_a0.6_r1 --enable-peak-kv-reservation --peak-kv-reserve-ratio 0.6
+traces/reasoning_q2.jsonl results tuned_n24_r1 --max-running-requests 24
+traces/reasoning_q2.jsonl results tuned_n40_r1 --max-running-requests 40
+traces/reasoning_q2.jsonl results tuned_n48_r1 --max-running-requests 48

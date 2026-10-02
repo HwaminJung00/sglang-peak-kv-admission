@@ -1,0 +1,6 @@
+$ python -m bench.verify results/det/reasoning_q0.2__upstream_r1.json results/det/reasoning_q0.2__default_off_r1.json
+비교 대상   : 120건  (test 에 없는 요청: 0건)
+완전 일치   : 120건  (100.0%)
+
+=== PASS ===
+(exit code 0)

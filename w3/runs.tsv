@@ -1,0 +1,53 @@
+2026-09-13 15:13:39	results/det	reasoning_q2__upstream_r1	OK	startup=69s	replay=568s	--enable-deterministic-inference --attention-backend triton
+2026-09-13 15:23:45	results/det	reasoning_q2__upstream_r2	OK	startup=33s	replay=567s	--enable-deterministic-inference --attention-backend triton
+2026-09-13 15:31:06	results	reasoning__upstream_r1	OK	startup=33s	replay=400s	
+2026-09-13 15:38:25	results	reasoning__upstream_r2	OK	startup=32s	replay=399s	
+2026-09-13 15:45:40	results	reasoning__upstream_r3	OK	startup=29s	replay=400s	
+2026-09-13 15:51:05	results	reasoning_q2__upstream_r1	OK	startup=30s	replay=289s	
+2026-09-13 16:04:29	results/det	reasoning_q0.2__upstream_r1	OK	startup=31s	replay=765s	--enable-deterministic-inference --attention-backend triton
+2026-09-13 16:10:13	results	reasoning_q2__default_r1	OK	startup=29s	replay=289s	
+2026-09-13 16:15:27	results	reasoning_q2__mine_a1.0_r1	OK	startup=29s	replay=277s	--enable-peak-kv-reservation --peak-kv-reserve-ratio 1.0
+2026-09-13 16:20:50	results	reasoning_q2__mine_a0.5_r1	OK	startup=29s	replay=289s	--enable-peak-kv-reservation --peak-kv-reserve-ratio 0.5
+2026-09-13 16:26:06	results	reasoning_q2__noradix_r1	OK	startup=29s	replay=279s	--disable-radix-cache
+2026-09-13 16:31:41	results	reasoning_q2__tuned_n32_r1	OK	startup=29s	replay=298s	--max-running-requests 32
+2026-09-13 16:37:29	results	reasoning_q2__cap65k_r1	OK	startup=29s	replay=309s	--max-total-tokens 65536
+2026-09-13 16:42:52	results	reasoning_q2__ablated_r1	OK	startup=25s	replay=290s	--chunked-prefill-size -1
+2026-09-13 16:48:17	results	reasoning_q2__mine_a0.75_r1	OK	startup=29s	replay=289s	--enable-peak-kv-reservation --peak-kv-reserve-ratio 0.75
+2026-09-13 16:53:35	results	reasoning_q2__mine_a0.9_r1	OK	startup=29s	replay=280s	--enable-peak-kv-reservation --peak-kv-reserve-ratio 0.9
+2026-09-13 16:59:01	results	reasoning_q2__mine_a0.6_r1	OK	startup=29s	replay=290s	--enable-peak-kv-reservation --peak-kv-reserve-ratio 0.6
+2026-09-13 17:04:56	results	reasoning_q2__tuned_n24_r1	OK	startup=29s	replay=318s	--max-running-requests 24
+2026-09-13 17:10:13	results	reasoning_q2__tuned_n40_r1	OK	startup=31s	replay=281s	--max-running-requests 40
+2026-09-13 17:15:24	results	reasoning_q2__tuned_n48_r1	OK	startup=29s	replay=278s	--max-running-requests 48
+2026-09-13 17:21:37	results	reasoning_q0.5__default_r1	OK	startup=29s	replay=335s	
+2026-09-13 17:27:45	results	reasoning_q0.5__ablated_r1	OK	startup=25s	replay=335s	--chunked-prefill-size -1
+2026-09-13 17:33:08	results	reasoning_q1__default_r1	OK	startup=29s	replay=287s	
+2026-09-13 17:38:24	results	reasoning_q1__ablated_r1	ERR1	startup=25s	replay=286s	--chunked-prefill-size -1
+2026-09-13 17:43:49	results	reasoning_q4__default_r1	OK	startup=29s	replay=289s	
+2026-09-13 17:49:09	results	reasoning_q4__ablated_r1	OK	startup=25s	replay=288s	--chunked-prefill-size -1
+2026-09-13 17:56:24	results	reasoning__ablated_r1	OK	startup=25s	replay=400s	--chunked-prefill-size -1
+2026-09-13 18:01:05	results	reasoning_q2_s0.3__default_r1	OK	startup=29s	replay=245s	
+2026-09-13 18:07:33	results	reasoning_q2_s1.0__default_r1	OK	startup=29s	replay=353s	
+2026-09-13 18:09:37	results	reasoning_q2_m1000__default_r1	OK	startup=30s	replay=85s	
+2026-09-13 18:19:46	results/det	reasoning_q2__default_off_r1	OK	startup=31s	replay=570s	--enable-deterministic-inference --attention-backend triton
+2026-09-13 18:33:07	results/det	reasoning_q0.2__default_off_r1	OK	startup=31s	replay=765s	--enable-deterministic-inference --attention-backend triton
+2026-09-13 18:38:31	results	reasoning_q2__ablated_r2	OK	startup=27s	replay=289s	--chunked-prefill-size -1
+2026-09-13 18:43:44	results	reasoning_q2__mine_a1.0_r2	OK	startup=30s	replay=276s	--enable-peak-kv-reservation --peak-kv-reserve-ratio 1.0
+2026-09-13 18:49:06	results	reasoning_q2__default_r2	OK	startup=29s	replay=289s	
+2026-09-13 18:54:20	results	reasoning_q2__mine_a1.0_r3	OK	startup=29s	replay=277s	--enable-peak-kv-reservation --peak-kv-reserve-ratio 1.0
+2026-09-13 18:59:43	results	reasoning_q2__default_r3	OK	startup=29s	replay=289s	
+2026-09-13 19:05:05	results	reasoning_q2__ablated_r3	OK	startup=25s	replay=289s	--chunked-prefill-size -1
+2026-09-13 19:12:23	results	reasoning__mine_a1.0_r1	OK	startup=29s	replay=400s	--enable-peak-kv-reservation --peak-kv-reserve-ratio 1.0
+2026-09-13 19:18:33	results	reasoning_q0.5__mine_a1.0_r1	OK	startup=29s	replay=335s	--enable-peak-kv-reservation --peak-kv-reserve-ratio 1.0
+2026-09-13 19:23:57	results	reasoning_q1__mine_a1.0_r1	OK	startup=29s	replay=289s	--enable-peak-kv-reservation --peak-kv-reserve-ratio 1.0
+2026-09-13 19:29:05	results	reasoning_q4__mine_a1.0_r1	OK	startup=29s	replay=270s	--enable-peak-kv-reservation --peak-kv-reserve-ratio 1.0
+2026-09-13 19:33:45	results	reasoning_q2_s0.3__mine_a1.0_r1	OK	startup=29s	replay=245s	--enable-peak-kv-reservation --peak-kv-reserve-ratio 1.0
+2026-09-13 19:40:17	results	reasoning_q2_s1.0__mine_a1.0_r1	OK	startup=29s	replay=356s	--enable-peak-kv-reservation --peak-kv-reserve-ratio 1.0
+2026-09-13 19:42:17	results	reasoning_q2_m1000__mine_a1.0_r1	OK	startup=29s	replay=86s	--enable-peak-kv-reservation --peak-kv-reserve-ratio 1.0
+2026-09-13 19:51:36	results/det	reasoning_q2__mine_a1.0_r1	OK	startup=31s	replay=523s	--enable-deterministic-inference --attention-backend triton --enable-peak-kv-reservation --peak-kv-reserve-ratio 1.0
+2026-09-13 19:57:07	results	reasoning_q1__tuned_n40_r1	OK	startup=29s	replay=293s	--max-running-requests 40
+2026-09-13 20:02:20	results	reasoning_q4__tuned_n40_r1	OK	startup=29s	replay=275s	--max-running-requests 40
+2026-09-13 20:07:03	results	reasoning_q2_s0.3__tuned_n40_r1	OK	startup=29s	replay=246s	--max-running-requests 40
+2026-09-13 20:13:38	results	reasoning_q2_s1.0__tuned_n40_r1	OK	startup=29s	replay=360s	--max-running-requests 40
+2026-09-13 20:15:38	results	reasoning_q2_m1000__tuned_n40_r1	OK	startup=29s	replay=86s	--max-running-requests 40
+2026-09-13 20:20:56	results	reasoning_q1__ablated_r1	OK	startup=25s	replay=288s	--chunked-prefill-size -1
+2026-09-13 20:26:11	results	reasoning_q2__mine_a1.0_p16_r1	OK	startup=29s	replay=276s	--enable-peak-kv-reservation --peak-kv-reserve-ratio 1.0 --page-size 16

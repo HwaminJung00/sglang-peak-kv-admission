@@ -1,0 +1,167 @@
+--- a/python/sglang/srt/server_args.py
++++ b/python/sglang/srt/server_args.py
+@@ -888,6 +888,20 @@
+         "How conservative the schedule policy is. A larger value means more conservative scheduling. Use a larger value if you see requests being retracted frequently.",
+         NS("schedule"),
+     ] = 1.0
++    enable_peak_kv_reservation: A[
++        bool,
++        "[W3 study] Delay admission of a new request when the running requests, "
++        "the requests admitted in this round and the new request would exceed the "
++        "KV pool at their peak, using each request's output budget (max_new_tokens). "
++        "Works with the radix cache enabled. Off by default.",
++        NS("schedule"),
++    ] = False
++    peak_kv_reserve_ratio: A[
++        float,
++        "[W3 study] Fraction (0, 1] of each request's remaining output budget that "
++        "--enable-peak-kv-reservation reserves. 1.0 reserves the whole budget.",
++        NS("schedule"),
++    ] = 1.0
+     page_size: A[
+         Optional[int],
+         Arg(help="The number of tokens in a page.", resolvable=True),
+@@ -9280,6 +9294,9 @@
+         assert (
+             self.schedule_conservativeness >= 0
+         ), "schedule_conservativeness must be non-negative"
++        assert (
++            0 < self.peak_kv_reserve_ratio <= 1.0
++        ), "peak_kv_reserve_ratio must be in (0, 1]"
+ 
+         if self.model_impl == "mindspore":
+             assert is_npu(), "MindSpore model impl is only supported on Ascend npu."
+--- a/python/sglang/srt/managers/scheduler.py
++++ b/python/sglang/srt/managers/scheduler.py
+@@ -3271,6 +3271,11 @@
+             dllm_config=self.dllm_config,
+             waiting_queue_len=len(self.waiting_queue),
+             prefill_tile_block_m=prefill_tile_block_m,
++            peak_kv_reserve_ratio=(
++                get_schedule().peak_kv_reserve_ratio
++                if get_schedule().enable_peak_kv_reservation
++                else None
++            ),
+         )
+ 
+         if self.chunked_req is not None:
+--- a/python/sglang/srt/managers/schedule_policy.py
++++ b/python/sglang/srt/managers/schedule_policy.py
+@@ -28,6 +28,7 @@
+ 
+ import os
+ import random
++import time
+ from collections import Counter, defaultdict
+ from contextlib import contextmanager
+ from enum import Enum, auto
+@@ -91,6 +92,26 @@
+ 
+ 
+ IGNORE_EOS_RESERVE_TOKENS = 1
++
++# [W3 study] --enable-peak-kv-reservation: count delayed admissions and log at
++# most once every 5 s so the server log shows the gate is on the real path.
++_PEAK_KV_DELAYS = 0
++_PEAK_KV_LAST_LOG = 0.0
++
++
++def _log_peak_kv_delay(num_running: int, num_admitted: int, min_free: float) -> None:
++    global _PEAK_KV_DELAYS, _PEAK_KV_LAST_LOG
++    _PEAK_KV_DELAYS += 1
++    now = time.monotonic()
++    if now - _PEAK_KV_LAST_LOG >= 5.0:
++        _PEAK_KV_LAST_LOG = now
++        logger.info(
++            f"Peak-KV reservation delayed admission. #delays: {_PEAK_KV_DELAYS}, "
++            f"#running-req: {num_running}, #admitted-this-round: {num_admitted}, "
++            f"min_free_tokens: {min_free:.0f}"
++        )
++
++
+ # AMD/HIP-only: the prefill tile-budget admission control is part of the AMD
+ # compact extend-attention work and is gated on HIP (see _check_prefill_tile_budget),
+ # so non-AMD vendors keep the exact legacy scheduler behavior.
+@@ -520,9 +541,12 @@
+         dllm_config: Optional[DllmConfig] = None,
+         waiting_queue_len: int = 0,
+         prefill_tile_block_m: int = 64,
++        peak_kv_reserve_ratio: Optional[float] = None,
+     ):
+         self.page_size = page_size
+         self.prefill_tile_block_m = prefill_tile_block_m
++        # [W3 study] None = --enable-peak-kv-reservation is off (upstream path).
++        self.peak_kv_reserve_ratio = peak_kv_reserve_ratio
+         self.tree_cache = tree_cache
+         self.token_to_kv_pool_allocator = token_to_kv_pool_allocator
+         self.running_batch = running_batch
+@@ -1198,6 +1222,52 @@
+ 
+         return self.budget_state()
+ 
++    def _peak_kv_fits(self, req: Req, extend_input_len: int) -> bool:
++        """[W3 study] Peak-KV reservation with the radix cache enabled.
++
++        Every running request, every request admitted in this round and the
++        candidate grow one token per step until they have generated
++        ``peak_kv_reserve_ratio`` of their remaining max_new_tokens. A request
++        that finishes frees the tokens it holds, except the prefix it shares
++        through the radix cache. Returns False if free KV (available +
++        evictable) would fall below the reserve before the peak is over.
++
++        Same simulation as add_one_req_ignore_eos, but without the
++        CLIP_MAX_NEW_TOKENS clip and new_token_ratio discount.
++        """
++        running = [] if self.running_batch is None else self.running_batch.reqs
++        running = [r for r in running if not r.finished()]
++        if not running and not self.can_run_list:
++            # Invariant: an idle server always admits one request (no deadlock).
++            return True
++
++        ratio = self.peak_kv_reserve_ratio
++        states = []
++        for r, in_running in (
++            *((r, True) for r in running),
++            *((r, False) for r in self.can_run_list),
++            (req, False),
++        ):
++            left = ratio * max(r.sampling_params.max_new_tokens - len(r.output_ids), 0)
++            held = len(r.origin_input_ids) + len(r.output_ids)
++            # A prefix shared through the radix cache stays locked by the other
++            # requests, so it is not freed when this request finishes.
++            shared = r.cached_tokens if in_running else len(r.prefix_indices)
++            states.append((left, self.ceil_paged_tokens(max(held - shared, 0))))
++        states.sort(key=lambda x: x[0])
++
++        free = self.cur_rem_tokens - self.ceil_paged_tokens(extend_input_len)
++        reserve = max(IGNORE_EOS_RESERVE_TOKENS, self.page_size)
++        freed = 0
++        for i, (left, held) in enumerate(states):
++            bs = len(states) - i
++            min_free = free + freed - left * bs
++            if min_free <= reserve * bs:
++                _log_peak_kv_delay(len(running), len(self.can_run_list), min_free)
++                return False
++            freed += held
++        return True
++
+     def add_one_req(
+         self, req: Req, has_chunked_req: bool, truncation_align_size: Optional[int]
+     ):
+@@ -1296,6 +1366,16 @@
+                         return AddReqResult.NO_TOKEN
+                     chunk_tokens_limit = min(self.rem_chunk_tokens, swa_cap)
+ 
++            # [W3 study] One extra gate after the upstream budget checks; it can
++            # only reject, so it never admits more than upstream does.
++            if (
++                self.peak_kv_reserve_ratio is not None
++                and not self.is_hybrid_swa
++                and self.dllm_config is None
++                and not self._peak_kv_fits(req, cand_extend_input_len)
++            ):
++                return AddReqResult.NO_TOKEN
++
+             # Negotiate only after every KV-budget gate (a NO_TOKEN rank must
+             # report not-prefillable via finalize()) and before init_load_back
+             # (a delay verdict must not start KV load-back).

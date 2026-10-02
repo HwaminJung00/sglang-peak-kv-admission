@@ -1,0 +1,20 @@
+# mine(α*=1.0) 쪽: 부하 곡선 · 손해 탐색 · deterministic 정확성
+traces/reasoning.jsonl results mine_a1.0_r1 --enable-peak-kv-reservation --peak-kv-reserve-ratio 1.0
+traces/reasoning_q0.5.jsonl results mine_a1.0_r1 --enable-peak-kv-reservation --peak-kv-reserve-ratio 1.0
+traces/reasoning_q1.jsonl results mine_a1.0_r1 --enable-peak-kv-reservation --peak-kv-reserve-ratio 1.0
+traces/reasoning_q4.jsonl results mine_a1.0_r1 --enable-peak-kv-reservation --peak-kv-reserve-ratio 1.0
+traces/reasoning_q2_s0.3.jsonl results mine_a1.0_r1 --enable-peak-kv-reservation --peak-kv-reserve-ratio 1.0
+traces/reasoning_q2_s1.0.jsonl results mine_a1.0_r1 --enable-peak-kv-reservation --peak-kv-reserve-ratio 1.0
+traces/reasoning_q2_m1000.jsonl results mine_a1.0_r1 --enable-peak-kv-reservation --peak-kv-reserve-ratio 1.0
+traces/reasoning_q2.jsonl results/det mine_a1.0_r1 --enable-deterministic-inference --attention-backend triton --enable-peak-kv-reservation --peak-kv-reserve-ratio 1.0
+# 4번째 control(tuned N*)도 같은 조건에서 — q2 에 맞춘 고정 제한이 다른 부하·길이 분포에서도 맞는가
+traces/reasoning_q1.jsonl results tuned_n40_r1 --max-running-requests 40
+traces/reasoning_q4.jsonl results tuned_n40_r1 --max-running-requests 40
+traces/reasoning_q2_s0.3.jsonl results tuned_n40_r1 --max-running-requests 40
+traces/reasoning_q2_s1.0.jsonl results tuned_n40_r1 --max-running-requests 40
+traces/reasoning_q2_m1000.jsonl results tuned_n40_r1 --max-running-requests 40
+# 재실행: q1 ablated r1 은 요청 1건이 ClientOSError(Connection reset by peer)로 실패 → 성능 결과에서 제외하고 다시 돈다
+# (실패 원본: results/failed/reasoning_q1__ablated_r1.err1.json, logs/failed/)
+traces/reasoning_q1.jsonl results ablated_r1 --chunked-prefill-size -1
+# 불변 조건 스모크 (plan.md 3.3): page 정렬 — --page-size 16 에서 OOM·오류·선점 없이 끝나는가
+traces/reasoning_q2.jsonl results mine_a1.0_p16_r1 --enable-peak-kv-reservation --peak-kv-reserve-ratio 1.0 --page-size 16

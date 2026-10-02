@@ -1,0 +1,29 @@
+$ python -m bench.verify results/det/reasoning_q2__upstream_r1.json results/det/reasoning_q2__upstream_r2.json
+비교 대상   : 120건  (test 에 없는 요청: 0건)
+완전 일치   : 115건  (95.8%)
+불일치      : 5건  (그중 앞 32자 이내에서 갈라진 것 0건 <- 이건 부동소수점 노이즈가 아니라 버그다)
+
+가장 이른 불일치 5건:
+
+  reason-00097: 앞 4203자 동일 (기준 출력의 14%)
+    ref : ...to be a list of technical terms without >>>explicit explanation or structure, making it unclear how to 
+    test: ...to be a list of technical terms without >>>clear explanation or structure, making it impossible to deri
+
+  reason-00100: 앞 1796자 동일 (기준 출력의 14%)
+    ref : ...y the provided context, but the context >>>here is the list of terms. However, the user's message is a 
+    test: ...y the provided context, but the context >>>is the list of terms. However, the user's message is a bit u
+
+  reason-00076: 앞 1904자 동일 (기준 출력의 18%)
+    ref : ...xplicitly stated the question, maybe the>>>y are expecting me to infer the task. However, the initial i
+    test: ...xplicitly stated the question, maybe the>>> task is to identify the main concepts or to categorize thes
+
+  reason-00099: 앞 1759자 동일 (기준 출력의 20%)
+    ref : ...se." So, the user is probably expecting >>>an answer based on the given text. However, the text is a li
+    test: ...se." So, the user is probably expecting >>>me to answer a question that was supposed to be included but
+
+  reason-00078: 앞 9671자 동일 (기준 출력의 94%)
+    ref : ...nd inference processes. These terms are >>>likely part of a complex system that manages various aspects
+    test: ...nd inference processes. These terms are >>>related to various components such as inference, forecasting
+
+=== PASS ===
+(exit code 0)

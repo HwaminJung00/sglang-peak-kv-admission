@@ -1,0 +1,19 @@
+# Raw experiment data lives in a GitHub Release asset, not in git.
+results/
+logs/
+traces/
+dist/
+# Local working material (not published)
+_work/
+.course/
+# Python / build artifacts
+__pycache__/
+*.pyc
+*.whl
+*.tar.*
+*.bundle
+# Binary documents and environment files are never committed
+*.docx
+*.pdf
+jupyter*.log
+.env

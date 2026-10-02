@@ -1,0 +1,29 @@
+$ python -m bench.verify results/reasoning_q2__upstream_r1.json results/reasoning_q2__default_r1.json
+비교 대상   : 120건  (test 에 없는 요청: 0건)
+완전 일치   : 17건  (14.2%)
+불일치      : 103건  (그중 앞 32자 이내에서 갈라진 것 1건 <- 이건 부동소수점 노이즈가 아니라 버그다)
+
+가장 이른 불일치 5건:
+
+  reason-00112: 앞 12자 동일 (기준 출력의 0%)
+    ref : ...Okay, let's >>>see. The user provided a long text that seems to be a mix of
+    test: ...Okay, let's >>>try to figure out what the user is asking here. The problem 
+
+  reason-00117: 앞 42자 동일 (기준 출력의 0%)
+    ref : ...ay, let's see. The user provided a long >>>text that seems to be a mix of technical terms related to ma
+    test: ...ay, let's see. The user provided a long >>>string of words and phrases that seem to be related to some 
+
+  reason-00103: 앞 69자 동일 (기준 출력의 0%)
+    ref : ...vided a long string of terms related to >>>technical systems, possibly in the context of distributed co
+    test: ...vided a long string of terms related to >>>some technical system, probably involving distributed comput
+
+  reason-00116: 앞 121자 동일 (기준 출력의 1%)
+    ref : ... is a bit of a jumble of technical terms>>>, so I need to parse through it carefully. The user mentione
+    test: ... is a bit of a jumble of technical terms>>> and phrases. The user provided a document title and a list 
+
+  reason-00097: 앞 160자 동일 (기준 출력의 1%)
+    ref : ...lated to machine learning, specifically >>>in the context of large language models or similar systems. 
+    test: ...lated to machine learning, specifically >>>things like "quantization," "pipeline fragmentation," "token
+
+=== FAIL (기준 95.0%) ===
+(exit code 1)

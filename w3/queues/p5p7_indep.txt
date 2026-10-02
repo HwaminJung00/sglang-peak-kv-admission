@@ -1,0 +1,17 @@
+# α* 와 무관한 실행 (P3 뒤에 바로 이어서 돌린다) — 패치 적용 상태, 플래그 OFF
+# P5 부하 곡선: default · ablated
+traces/reasoning_q0.5.jsonl results default_r1
+traces/reasoning_q0.5.jsonl results ablated_r1 --chunked-prefill-size -1
+traces/reasoning_q1.jsonl results default_r1
+traces/reasoning_q1.jsonl results ablated_r1 --chunked-prefill-size -1
+traces/reasoning_q4.jsonl results default_r1
+traces/reasoning_q4.jsonl results ablated_r1 --chunked-prefill-size -1
+# 기본 trace(qps 0.35) ablated — 2.1 순정 3회와 같은 trace
+traces/reasoning.jsonl results ablated_r1 --chunked-prefill-size -1
+# P7 손해 탐색: default
+traces/reasoning_q2_s0.3.jsonl results default_r1
+traces/reasoning_q2_s1.0.jsonl results default_r1
+traces/reasoning_q2_m1000.jsonl results default_r1
+# P6 정확성: 패치 적용 + 플래그 OFF, deterministic (순정 det 2회와 비교)
+traces/reasoning_q2.jsonl results/det default_off_r1 --enable-deterministic-inference --attention-backend triton
+traces/reasoning_q0.2.jsonl results/det default_off_r1 --enable-deterministic-inference --attention-backend triton
