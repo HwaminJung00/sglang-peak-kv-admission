@@ -1,0 +1,37 @@
+{
+  "patch.equiv_bruteforce": {
+    "agg": "count",
+    "display": "20,000/20,000",
+    "n": null,
+    "source": "third_party/sglang_v0_5_18/schedule_policy.py + patch/peak_kv_reservation.diff; tests/test_upstream_equivalence.py --full: check_bruteforce (seed 2, 20,000 states); states where _peak_kv_fits agrees with the token-by-token simulation at the sampled free KV and at the threshold",
+    "value": "20000/20000"
+  },
+  "patch.equiv_edge_explained": {
+    "agg": "count",
+    "display": "19,887/19,887",
+    "n": null,
+    "source": "third_party/sglang_v0_5_18/schedule_policy.py + patch/peak_kv_reservation.diff; tests/test_upstream_equivalence.py --full: check_edge_cases (seed 1, 20,000 draws); states where the verdict equals upstream add_one_req_ignore_eos after rules E1-E3",
+    "value": "19887/19887"
+  },
+  "patch.equiv_edge_upstream_diff": {
+    "agg": "count",
+    "display": "695/19,887",
+    "n": null,
+    "source": "third_party/sglang_v0_5_18/schedule_policy.py + patch/peak_kv_reservation.diff; tests/test_upstream_equivalence.py --full: check_edge_cases (seed 1, 20,000 draws); states with finished or zero-left requests where the verdict differs from upstream add_one_req_ignore_eos (rules E1-E3)",
+    "value": "695/19887"
+  },
+  "patch.equiv_paged_physical": {
+    "agg": "count",
+    "display": "18,277/18,277",
+    "n": null,
+    "source": "third_party/sglang_v0_5_18/schedule_policy.py + patch/peak_kv_reservation.diff; tests/test_upstream_equivalence.py --full: check_paged_physical (seed 7, 20,000 draws, page_size 2/16/64, alpha=1); admitted states with no page-allocation failure / admitted states",
+    "value": "18277/18277"
+  },
+  "patch.equiv_upstream": {
+    "agg": "count",
+    "display": "19,907/19,907",
+    "n": null,
+    "source": "third_party/sglang_v0_5_18/schedule_policy.py + patch/peak_kv_reservation.diff; tests/test_upstream_equivalence.py --full: check_upstream (seed 0, 20,000 draws; idle draws skipped); agreeing verdicts / states, _peak_kv_fits vs upstream add_one_req_ignore_eos at alpha=1, page_size=1, no shared prefix, no finished or zero-left requests",
+    "value": "19907/19907"
+  }
+}
