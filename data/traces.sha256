@@ -1,0 +1,57 @@
+# SHA-256 of the 17 replay traces of this study. The trace files themselves are not published
+# (they are output of the course's generator); this file lets you check a regenerated copy:
+#
+#     sha256sum -c data/traces.sha256        # from the repository root, traces in traces/
+#
+# Generator: python -m workloads.generators from the course repository
+#   https://github.com/mlleo/inference-engine-study at commit 802a1642fcefc06735a89af054213c9904b4ff45
+#   (not included here; bash tools/fetch_course_harness.sh checks it out into .course/).
+#   Run the commands below from that checkout's project/ folder, then copy traces/ here.
+# Tokenizer: --model Qwen/Qwen3-4B at revision 1cfa9a7208912126459214e8b04321603b3df60c, the snapshot
+#   the study used (the server logs name it). With --model the prompt token lengths are exact, so the
+#   prompt texts depend on the tokenizer. The generator has no revision flag; to pin the revision,
+#   pass a local snapshot folder of that revision as --model.
+# The commands are inferred from each file's name and __meta__ line, w3/make_queues.sh and the course
+# scripts (scripts/run_baseline.sh for reasoning.jsonl, scripts/cross_replay.sh for the *_x files).
+# Re-checked on 2026-10-02 against the generator functions: arrival_time, max_new_tokens and rid
+# match for all 17 files. The prompt texts were not regenerated (that needs the tokenizer).
+# Every trace sets ignore_eos=True, so each request generates exactly max_new_tokens tokens.
+#
+# Used by: reasoning (qps 0.35) = 09-06, 09-07 and 09-13 runs; q0.5 q0.6 q0.8 q1 q2 q4 q8 = 09-07 sweep
+# (q0.5 q1 q2 q4 again on 09-13); q0.2 = 09-13 deterministic runs; q2_s0.3 q2_s1.0 q2_m1000 = 09-13;
+# *_x = 09-13 cross replay.
+
+# python -m workloads.generators agent --out traces/ --model Qwen/Qwen3-4B --scale 0.3 --suffix _x
+a31ef7d5c540480d3a39bc442f167c24ace5dc62ce537b45d62b3aa7ff590596  traces/agent_x.jsonl
+# python -m workloads.generators mixed --out traces/ --model Qwen/Qwen3-4B --scale 0.3 --suffix _x
+63842023dc288a16656f008780517315c05ac1decad31313ecd217caf0b001b6  traces/mixed_x.jsonl
+# python -m workloads.generators rag --out traces/ --model Qwen/Qwen3-4B --scale 0.3 --suffix _x
+8d3bbba0665b51d621e4dc78af03d981f9ee9a54c53ca21eb6bedb6a5c0fafd9  traces/rag_x.jsonl
+# python -m workloads.generators reasoning --out traces/ --model Qwen/Qwen3-4B
+c90bb7f216e1fc5d8a290013644d7aa12852afcff58883a9ad793860e8dbaf47  traces/reasoning.jsonl
+# python -m workloads.generators reasoning --out traces/ --model Qwen/Qwen3-4B --set qps=0.2 --suffix _q0.2
+ee579eea2800969d303e7e6a5c224c2841bff9300dcb6dcecd4fee0db5d234c8  traces/reasoning_q0.2.jsonl
+# python -m workloads.generators reasoning --out traces/ --model Qwen/Qwen3-4B --set qps=0.5 --suffix _q0.5
+8ceed2e6f30a51433965515bec85afd2200fe4cd0f93ec6175e43d53f493662b  traces/reasoning_q0.5.jsonl
+# python -m workloads.generators reasoning --out traces/ --model Qwen/Qwen3-4B --set qps=0.6 --suffix _q0.6
+f9156828c03327945307171edb75cc73a7de478b675ca8d5c715caa4d45fe11f  traces/reasoning_q0.6.jsonl
+# python -m workloads.generators reasoning --out traces/ --model Qwen/Qwen3-4B --set qps=0.8 --suffix _q0.8
+1b018e5b7d174860d5c1de99b08052976c3c47f9e198da3cac290b79c97e5587  traces/reasoning_q0.8.jsonl
+# python -m workloads.generators reasoning --out traces/ --model Qwen/Qwen3-4B --set qps=1 --suffix _q1
+30b18c144eb8af18697bb428bca77a92afdb3518d06081a8a676beb60f85850f  traces/reasoning_q1.jsonl
+# python -m workloads.generators reasoning --out traces/ --model Qwen/Qwen3-4B --set qps=2 --suffix _q2
+a43a9e4a0d63a14fa4c1eb7f8dab4bc27a9504e9cd39fb83a0bc615f4652ac0c  traces/reasoning_q2.jsonl
+# python -m workloads.generators reasoning --out traces/ --model Qwen/Qwen3-4B --set qps=2 out_mean=1000 --suffix _q2_m1000
+b21add22b383839e2c6443e23fb78cf74d5106322db6a5e7c6ab7d6240b2ce75  traces/reasoning_q2_m1000.jsonl
+# python -m workloads.generators reasoning --out traces/ --model Qwen/Qwen3-4B --set qps=2 out_sigma=0.3 --suffix _q2_s0.3
+ed75abca88f871cf3b7a19ab9362643b2c9dea9555963186ce3564977a533bfc  traces/reasoning_q2_s0.3.jsonl
+# python -m workloads.generators reasoning --out traces/ --model Qwen/Qwen3-4B --set qps=2 out_sigma=1.0 --suffix _q2_s1.0
+52a93f6d004046642fa9c0d486d9862e84fcf6d9a476fd820f9aa8773047b341  traces/reasoning_q2_s1.0.jsonl
+# python -m workloads.generators reasoning --out traces/ --model Qwen/Qwen3-4B --set qps=4 --suffix _q4
+dfb1cd22d0cbfc3915a24b95069735d70a7232c33a04455e69f241f2eed4c6ec  traces/reasoning_q4.jsonl
+# python -m workloads.generators reasoning --out traces/ --model Qwen/Qwen3-4B --set qps=8 --suffix _q8
+9bd9e70d366813eb9d8c39c193a97df8a91ddd5dd68ca5118d6adefce0ab98a4  traces/reasoning_q8.jsonl
+# python -m workloads.generators reasoning --out traces/ --model Qwen/Qwen3-4B --scale 0.3 --suffix _x
+762340c5567f32a4ab36396b1dd6e58445bab86990724e1bd99eaabeada85e58  traces/reasoning_x.jsonl
+# python -m workloads.generators structured --out traces/ --model Qwen/Qwen3-4B --scale 0.3 --suffix _x
+60e87b36a1984db50216ab1c9a2e62e5427d22ca2a1549a3bb500e0056192c2a  traces/structured_x.jsonl
