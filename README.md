@@ -40,7 +40,7 @@ SLO: mean time per output token (TPOT) ≤ <!--n:trace.tpot_slo_ms-->60<!--/n-->
 2. **Existing flags reproduce most of the gain.** `--disable-radix-cache` switches SGLang to the exact-length path the gate is ported from and reaches <!--n:q2.noradix.goodput-->0.435<!--/n--> req/s (<!--n:q2.share_of_gain.noradix_pct-->88.0<!--/n-->% of the gain, n=1). `--max-running-requests 40` reaches <!--n:q2.tuned_n40.goodput-->0.432<!--/n--> (<!--n:q2.share_of_gain.tuned_n40_pct-->78.1<!--/n-->%, n=1). All three settings meet the SLO for 120/120 requests, so their remaining goodput differences are wall time and single runs. The gate adds two things: exact-length admission with the radix cache on, and no retraction under any load tested. N = 40 retracted again at 1 req/s, 4 req/s and σ = 1.0 (<!--n:reretract.tuned_n40.q1-->1<!--/n-->, <!--n:reretract.tuned_n40.q4-->4<!--/n--> and <!--n:reretract.tuned_n40.s1.0-->3<!--/n--> times, n=1 each). This trace shares only a <!--n:trace.shared_prefix_tokens-->36<!--/n-->-token prefix, so keeping the radix cache on is worth little here. Whether larger shared prefixes favor the gate was not measured.
 3. **Oracle lengths.** Every trace sets `ignore_eos=True`, so `max_new_tokens` equals each request's real output length, and the gate reserves exactly what each request will use. Read the result as an upper bound for any scheme that has to guess lengths. It is not usable as-is for traffic with unknown output lengths or with a TTFT SLO (see [Costs](#costs-and-when-not-to-use-it)).
 
-[Report (English)](docs/REPORT.md) · [보고서 (한국어)](docs/REPORT.ko.md) · [Patch](patch/README.md) · [CPU tests](tests/README.md) · [Hard questions](#faq) · [Errata](ERRATA.md) · [Experiment log](docs/EXPERIMENTS.md) · [Data](data/README.md)
+[Report (English)](docs/REPORT.md) · [보고서 (한국어)](docs/REPORT.ko.md) · [Patch](patch/README.md) · [Patch on SGLang (fork)](https://github.com/HwaminJung00/sglang/commit/5157a47e8649c6b3cc43705114fa8ec41d8d733d) · [CPU tests](tests/README.md) · [Hard questions](#faq) · [Errata](ERRATA.md) · [Experiment log](docs/EXPERIMENTS.md) · [Data](data/README.md)
 
 ## Problem and setup
 
@@ -217,7 +217,7 @@ The direction, reserving peak KV conservatively at admission, came from the cour
 
 Steps A to D run on a CPU-only machine with Python 3.12. Step E needs a GPU.
 
-**A. Apply the patch** to SGLang v0.5.18. [`patch/README.md`](patch/README.md) also covers an installed wheel (`patch -p2`) and how to revert.
+**A. Apply the patch** to SGLang v0.5.18, or clone it already applied: branch [`peak-kv-admission`](https://github.com/HwaminJung00/sglang/tree/peak-kv-admission) of the fork `HwaminJung00/sglang` (commit [`5157a47`](https://github.com/HwaminJung00/sglang/commit/5157a47e8649c6b3cc43705114fa8ec41d8d733d) on tag `v0.5.18`). [`patch/README.md`](patch/README.md) also covers an installed wheel (`patch -p2`) and how to revert.
 
 ```bash
 git clone https://github.com/sgl-project/sglang.git && cd sglang
@@ -309,7 +309,7 @@ Data files are described in [`data/README.md`](data/README.md).
 
 ## Tools used
 
-The original study — patch, experiments, analysis scripts and report — was done during the course. After submission, an AI coding assistant ([Claude Code](https://claude.com/claude-code)) was used to audit the results, write the clean-room metrics module and equivalence tests, regenerate the figures and draft these corrected documents. The author reviewed the content before publication. Commits made with the assistant carry a `Co-Authored-By: Claude` line.
+The original study — patch, experiments, analysis scripts and report — was done during the course. After submission, an AI coding assistant ([Claude Code](https://claude.com/claude-code)) was used to audit the results, write the clean-room metrics module and equivalence tests, regenerate the figures and draft these corrected documents. The author approved this version for publication. Commits made with the assistant carry a `Co-Authored-By: Claude` line.
 
 ## License
 

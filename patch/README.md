@@ -4,6 +4,8 @@
 
 It equals the study's own copy, last modified on 2026-09-13 before the first patched run that day. It has not been edited for this repository, not even to fix the wording problem in note C3 below. The server logs of the patched runs contain the log line this diff defines (see [`data/logs_sample/`](../data/logs_sample/)).
 
+The same diff is also committed on top of the `v0.5.18` tag in the fork [`HwaminJung00/sglang`, branch `peak-kv-admission`](https://github.com/HwaminJung00/sglang/tree/peak-kv-admission) (commit [`5157a47`](https://github.com/HwaminJung00/sglang/commit/5157a47e8649c6b3cc43705114fa8ec41d8d733d)), so the change can be read in the context of the SGLang source, or cloned with `git clone --depth 1 -b peak-kv-admission https://github.com/HwaminJung00/sglang`.
+
 ## What it does
 
 The patch ports SGLang's existing exact-length admission simulation to the radix-cache path, behind a flag. That simulation is `PrefillAdder.add_one_req_ignore_eos`, and upstream runs it only when the radix cache is disabled. The diff is +<!--n:patch.lines_added-->102<!--/n-->/−<!--n:patch.lines_removed-->0<!--/n--> lines in <!--n:patch.files-->3<!--/n--> files.

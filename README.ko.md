@@ -40,7 +40,7 @@ SLO는 요청별 평균 TPOT(출력 토큰당 시간) ≤ <!--n:trace.tpot_slo_m
 2. **기존 플래그가 이득의 대부분을 재현한다.** `--disable-radix-cache`는 게이트가 옮겨 온 정확 길이 경로를 SGLang이 직접 쓰게 하며, <!--n:q2.noradix.goodput-->0.435<!--/n--> req/s(이득의 <!--n:q2.share_of_gain.noradix_pct-->88.0<!--/n-->%, n=1)에 이른다. `--max-running-requests 40`은 <!--n:q2.tuned_n40.goodput-->0.432<!--/n-->(<!--n:q2.share_of_gain.tuned_n40_pct-->78.1<!--/n-->%, n=1)이다. 세 설정 모두 요청 120개가 전부 SLO를 지키므로 남은 goodput 차이는 wall time 차이이고, 1회 실행끼리의 비교다. 게이트가 더하는 것은 두 가지다. radix cache를 켠 채 정확 길이 입장을 쓴다는 점, 그리고 시험한 모든 부하에서 선점이 0이라는 점이다. N = 40은 초당 1요청, 초당 4요청, σ = 1.0에서 다시 선점했다(각각 <!--n:reretract.tuned_n40.q1-->1<!--/n-->, <!--n:reretract.tuned_n40.q4-->4<!--/n-->, <!--n:reretract.tuned_n40.s1.0-->3<!--/n-->회, 모두 n=1). 이 trace의 공유 prefix는 <!--n:trace.shared_prefix_tokens-->36<!--/n-->토큰뿐이라 radix cache를 켜 두는 이득이 작다. 공유 prefix가 큰 워크로드에서 게이트가 유리한지는 측정하지 않았다.
 3. **오라클 길이.** 모든 trace가 `ignore_eos=True`라서 `max_new_tokens`가 곧 실제 출력 길이이고, 게이트는 각 요청이 쓸 만큼을 정확히 예약한다. 이 결과는 길이를 짐작해야 하는 방식이 낼 수 있는 상한으로 읽어야 한다. 출력 길이를 모르는 트래픽이나 TTFT SLO가 있는 서비스에는 그대로 쓸 수 없다([대가](#대가와-쓰지-말아야-할-때) 참고).
 
-[보고서 (한국어)](docs/REPORT.ko.md) · [Report (English)](docs/REPORT.md) · [패치](patch/README.md) · [CPU 테스트](tests/README.md) · [어려운 질문](#faq) · [정오표](ERRATA.md) · [실험 기록](docs/EXPERIMENTS.md) · [데이터](data/README.md)
+[보고서 (한국어)](docs/REPORT.ko.md) · [Report (English)](docs/REPORT.md) · [패치](patch/README.md) · [SGLang fork의 패치 커밋](https://github.com/HwaminJung00/sglang/commit/5157a47e8649c6b3cc43705114fa8ec41d8d733d) · [CPU 테스트](tests/README.md) · [어려운 질문](#faq) · [정오표](ERRATA.md) · [실험 기록](docs/EXPERIMENTS.md) · [데이터](data/README.md)
 
 ## 문제와 실험 환경
 
@@ -217,7 +217,7 @@ goodput은 SLO를 지킨 요청 수를 wall time으로 나누고, wall time은 �
 
 A–D는 Python 3.12만 있는 CPU 머신에서 돌아간다. E에는 GPU가 필요하다.
 
-**A. 패치 적용** (SGLang v0.5.18). 설치된 wheel에 적용하는 방법(`patch -p2`)과 되돌리는 방법은 [`patch/README.md`](patch/README.md)에 있다.
+**A. 패치 적용** (SGLang v0.5.18). 이미 적용된 코드를 받으려면 fork `HwaminJung00/sglang`의 [`peak-kv-admission`](https://github.com/HwaminJung00/sglang/tree/peak-kv-admission) 브랜치를 쓰면 된다(태그 `v0.5.18` 위의 커밋 [`5157a47`](https://github.com/HwaminJung00/sglang/commit/5157a47e8649c6b3cc43705114fa8ec41d8d733d)). 설치된 wheel에 적용하는 방법(`patch -p2`)과 되돌리는 방법은 [`patch/README.md`](patch/README.md)에 있다.
 
 ```bash
 git clone https://github.com/sgl-project/sglang.git && cd sglang
@@ -309,7 +309,7 @@ ERRATA.md      제출 보고서의 정정 목록
 
 ## 도구 사용
 
-원래 연구, 곧 패치·실험·분석 스크립트·보고서는 과정 중에 했다. 제출 뒤에는 AI 코딩 도구([Claude Code](https://claude.com/claude-code))로 결과를 감사하고, 클린룸 지표 모듈과 동치 테스트를 작성하고, 그림을 다시 만들고, 이 정정 문서들의 초안을 썼다. 공개 전에 저자가 내용을 검토했다. 이 도구와 함께 만든 커밋에는 `Co-Authored-By: Claude` 줄이 붙어 있다.
+원래 연구, 곧 패치·실험·분석 스크립트·보고서는 과정 중에 했다. 제출 뒤에는 AI 코딩 도구([Claude Code](https://claude.com/claude-code))로 결과를 감사하고, 클린룸 지표 모듈과 동치 테스트를 작성하고, 그림을 다시 만들고, 이 정정 문서들의 초안을 썼다. 공개는 저자가 승인했다. 이 도구와 함께 만든 커밋에는 `Co-Authored-By: Claude` 줄이 붙어 있다.
 
 ## 라이선스
 
