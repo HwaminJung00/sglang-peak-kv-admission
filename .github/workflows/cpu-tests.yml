@@ -1,0 +1,89 @@
+# CPU-only checks: no GPU, no SGLang install, no secrets.
+# What they cover and what they do not: tests/README.md.
+name: cpu-tests
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cpu-tests-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  cpu-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      PYTHONDONTWRITEBYTECODE: "1"
+      SGLANG_WHEEL: sglang-0.5.18-cp312-cp312-manylinux_2_34_x86_64.whl
+      # sha256 published by PyPI for that file
+      SGLANG_WHEEL_SHA256: fba7bb31a5de4c014945cbc50e9357c9253cc965a423736c324b2aaccd2270dc
+    steps:
+      - name: Check out
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+
+      - name: Unit tests (w3/test_peak_kv.py against the patched gate)
+        run: python3 tests/run_cpu_tests.py
+
+      - name: Equivalence checks (N = 2,000 per check)
+        run: python3 tests/test_upstream_equivalence.py
+
+      - name: artifacts/equivalence.json is reproducible (N = 20,000)
+        run: |
+          python3 tests/test_upstream_equivalence.py --full
+          git diff --exit-code -- artifacts/equivalence.json
+
+      - name: Numbers in the docs match artifacts/*.json
+        run: python3 tools/check_numbers.py
+
+      - name: artifacts/numbers.json is fresh with respect to data/derived
+        run: python3 -m analysis.headline --check
+
+      - name: Preregistered selection rule still picks alpha*=1.0, N*=40
+        run: |
+          python3 -m w3.select_star | tee "$RUNNER_TEMP/select.txt"
+          tail -n 1 "$RUNNER_TEMP/select.txt" | grep -qx 'ASTAR=1.0 NSTAR=40'
+
+      - name: Pre-publication checks (course files, secrets, sizes, licenses)
+        run: bash tools/prepublish_check.sh
+
+      - name: Figures agree with artifacts/numbers.json
+        run: |
+          python3 -m pip install --quiet "matplotlib==3.11.2"
+          python3 -m w3.figures --out "$RUNNER_TEMP/figs"
+
+      - name: Download sglang==0.5.18 from PyPI and check its sha256
+        run: |
+          python3 -m pip download "sglang==0.5.18" --no-deps --only-binary=:all: \
+            --platform manylinux_2_34_x86_64 --python-version 3.12 \
+            --implementation cp --abi cp312 --dest "$RUNNER_TEMP/wheel"
+          echo "$SGLANG_WHEEL_SHA256  $RUNNER_TEMP/wheel/$SGLANG_WHEEL" | sha256sum -c -
+
+      - name: Vendored schedule_policy.py and LICENSE are byte-identical to the wheel
+        run: |
+          mkdir -p "$RUNNER_TEMP/tree"
+          cd "$RUNNER_TEMP/tree"
+          python3 -m zipfile -e "$RUNNER_TEMP/wheel/$SGLANG_WHEEL" .
+          cmp sglang/srt/managers/schedule_policy.py "$GITHUB_WORKSPACE/third_party/sglang_v0_5_18/schedule_policy.py"
+          cmp sglang-0.5.18.dist-info/licenses/LICENSE "$GITHUB_WORKSPACE/third_party/sglang_v0_5_18/LICENSE"
+
+      - name: The measured diff applies to the wheel tree (patch -p2 --dry-run, no offset, no fuzz)
+        run: |
+          cd "$RUNNER_TEMP/tree"
+          patch -p2 --dry-run --forward --fuzz=0 -i "$GITHUB_WORKSPACE/patch/peak_kv_reservation.diff" \
+            | tee "$RUNNER_TEMP/patch.log"
+          if grep -Eqi 'offset|fuzz|fail|reject|reversed|skipp' "$RUNNER_TEMP/patch.log"; then
+            echo "::error::patch/peak_kv_reservation.diff does not apply cleanly to the sglang 0.5.18 wheel"
+            exit 1
+          fi
