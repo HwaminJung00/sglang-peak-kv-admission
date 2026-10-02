@@ -1,30 +1,49 @@
 """
-W3 결과 요약: 클라이언트 결과(JSON) + 서버 로그 + /metrics 를 한 표로 모은다.
-GPU 가 필요 없고, bench/metrics.py 의 정의(summarize, per_request)를 그대로 가져다 쓴다.
+W3 result summary: client result JSON + server log + /metrics dump in one table.
+Needs no GPU. The client-side metrics come from w3.metrics (summarize_run, request_metrics).
 
-    python -m w3.summarize 'results/reasoning_q2__*.json'            # 실행별 표
-    python -m w3.summarize 'results/reasoning_q2__*.json' --group     # 반복을 묶어 중앙값 [min–max]
-    python -m w3.summarize 'results/*.json' 'results/det/*.json' --csv results/w3_runs.csv
+    python3 -m w3.summarize 'results/reasoning_q2__*.json'              # one row per run
+    python3 -m w3.summarize 'results/reasoning_q2__*.json' --group       # repetitions grouped: median [min-max]
+    python3 -m w3.summarize 'results/reasoning*__*_r*.json' --csv data/derived/w3_runs.csv
 
-추가 열 (bench.metrics 에 없는 것):
-  e2e_p50         E2E 중앙값
-  ttft_mean       TTFT 평균 (W3 q≥2 의 TTFT 는 '즉시 입장'과 '30 s 이상 대기' 두 봉우리라 p50 이 경계에서 불안정)
-  wait10_reqs     TTFT 가 10 s 를 넘은 요청 수 (입장·대기열에서 기다린 요청)
-  stall5_reqs     한 요청 안에서 토큰 간격이 5 s 를 넘은 요청 수 (보조 SLO 위반 수)
-  stall_max_s     가장 긴 정지(s)
-  aux_slo_%       TPOT ≤ SLO 이고 정지 ≤ 5 s 인 요청 비율 (결과 보기 전에 정한 보조 지표)
-  retracted       서버 로그 `#retracted_reqs` 합 (같은 요청이 여러 번 셀 수 있음)
-  max_usage       Decode/Prefill 줄의 token usage 최댓값
-  max_running     #running-req 최댓값
-  max_queue       #queue-req 최댓값
-  graph_%         Decode 줄 중 `cuda graph: True` 비율 (40 step 마다 한 줄 → 표본)
-  peak_delays     [mine] `Peak-KV reservation delayed admission` 누적 #delays 마지막 값
-  recompute_tok   /metrics: prefill_compute − input 유효 토큰 (선점된 요청의 재계산 KV)
+Regenerating the derived tables in data/derived/ (run from the repository root, raw data in results/ and logs/):
+
+    python3 -m w3.summarize 'results/reasoning*__*_r*.json' --csv data/derived/w3_runs.csv
+    python3 -m w3.summarize 'results/det/*.json' --csv data/derived/w3_det_runs.csv
+    python3 -m w3.summarize 'results/reasoning_q2__*_r*.json' --group --csv data/derived/w3_q2_grouped.csv
+    python3 -m w3.summarize 'results/reasoning_q2__default_r*.json' 'results/reasoning_q2__ablated_r*.json' \\
+        'results/reasoning_q2__mine_a1.0_r*.json' --std-csv data/derived/reasoning_q2_3bar_runs.csv
+    python3 -m w3.summarize 'results/reasoning_q*__default.json' --sweep-csv data/derived/sweep_0907.csv
+
+Extra columns (beyond the standard summary of w3.metrics):
+  e2e_p50         median E2E
+  ttft_mean       mean TTFT (at q >= 2 the TTFT distribution has two modes, admitted at once
+                  vs. waiting 30 s or more, so its p50 is unstable at the boundary)
+  wait10_reqs     requests whose TTFT exceeded 10 s (waited for admission in the queue)
+  stall5_reqs     requests with a gap of more than 5 s between two streamed tokens
+                  (violations of the auxiliary SLO)
+  stall_max_s     longest such gap (s)
+  aux_slo_%       share of requests with TPOT <= SLO and no gap > 5 s (auxiliary metric fixed
+                  before the results were seen)
+  retracted       sum of `#retracted_reqs` in the server log (a request can be counted twice)
+  max_usage       largest `token usage` on Decode/Prefill lines
+  max_running     largest #running-req
+  max_queue       largest #queue-req
+  graph_%         share of Decode lines with `cuda graph: True` (one line per 40 steps, a sample)
+  peak_delays     [mine] last cumulative #delays of `Peak-KV reservation delayed admission`
+                  (logged at most every 5 s, so a lower bound)
+  recompute_tok   /metrics: prefill_compute - input effective tokens (KV recomputed for
+                  retracted requests)
+
+Server logs are found by the w3/run_one.sh naming rule, logs/<sub>/server_<trace>__<tag>.log.
+The 09-07 load sweep (results/reasoning_q<Q>__default.json) predates that script; its logs are
+logs/server_q<Q>.log.
 """
 
 from __future__ import annotations
 
 import argparse
+import csv
 import glob
 import json
 import os
@@ -32,8 +51,7 @@ import re
 import statistics
 import sys
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from bench.metrics import pct, per_request, summarize  # noqa: E402
+from w3.metrics import STD_COLS, percentile, request_metrics, summarize_run
 
 STALL_S = 5.0
 
@@ -44,15 +62,27 @@ RE_QUEUE = re.compile(r"#queue-req: (\d+)")
 RE_PEAK = re.compile(r"Peak-KV reservation delayed admission\. #delays: (\d+)")
 RE_POOL = re.compile(r"max_total_num_tokens=(\d+)")
 RE_METRIC = re.compile(r'^(sglang:[a-z_]+)\{([^}]*)\} ([0-9.eE+-]+)$')
+# 09-07 load sweep result names (one run per QPS, no repetition suffix)
+RE_SWEEP_0907 = re.compile(r"^reasoning_q([\d.]+)__default$")
 
 
 def log_path_for(res_path: str) -> str:
-    """results/det/x__t.json -> logs/det/server_x__t.log"""
+    """results/det/x__t.json -> logs/det/server_x__t.log
+
+    Fallback for the 09-07 sweep: results/reasoning_q<Q>__default.json -> logs/server_q<Q>.log
+    when the run_one.sh name does not exist.
+    """
     d, f = os.path.split(res_path)
     sub = os.path.relpath(d, "results")
     sub = "" if sub in (".", "") else sub
     name = os.path.splitext(f)[0]
-    return os.path.join("logs", sub, f"server_{name}.log")
+    path = os.path.join("logs", sub, f"server_{name}.log")
+    m = RE_SWEEP_0907.match(name)
+    if not sub and m and not os.path.exists(path):
+        alt = os.path.join("logs", f"server_q{m.group(1)}.log")
+        if os.path.exists(alt):
+            return alt
+    return path
 
 
 def parse_server_log(path: str) -> dict:
@@ -128,7 +158,7 @@ def parse_metrics(path: str) -> dict:
 
 
 def client_extra(blob: dict) -> dict:
-    rows = [per_request(r) for r in blob["records"]]
+    rows = [request_metrics(r) for r in blob["records"]]
     good = [r for r in rows if not r["error"] and "ttft_ms" in r]
     stalls, aux_ok = [], 0
     for rec, row in zip(blob["records"], rows):
@@ -139,7 +169,7 @@ def client_extra(blob: dict) -> dict:
         stalls.append(gmax)
         aux_ok += bool(row.get("slo_ok")) and gmax <= STALL_S
     return {
-        "e2e_p50": pct([r["e2e_ms"] for r in good], 50),
+        "e2e_p50": percentile([r["e2e_ms"] for r in good], 50),
         "ttft_mean": statistics.fmean([r["ttft_ms"] for r in good]) if good else float("nan"),
         "wait10_reqs": sum(1 for r in good if r["ttft_ms"] > 10_000),
         "stall5_reqs": sum(1 for g in stalls if g > STALL_S),
@@ -149,14 +179,18 @@ def client_extra(blob: dict) -> dict:
 
 
 def run_row(path: str) -> dict:
-    blob = json.load(open(path))
-    s = summarize(blob)
+    with open(path) as fh:
+        blob = json.load(fh)
+    s = summarize_run(blob)
     name = os.path.splitext(os.path.basename(path))[0]
     stem, _, tag = name.partition("__")
+    s["std_tag"] = s["tag"]          # tag as stored in the result file (standard table)
     s.update(file=path, trace=stem, tag=tag,
-             dataset=os.path.relpath(os.path.dirname(path), "results"))
+             dataset=os.path.relpath(os.path.dirname(path), "results"),
+             qps=(blob.get("meta") or {}).get("qps"))
     s.update(client_extra(blob))
     lp = log_path_for(path)
+    s["server_log"] = lp if os.path.exists(lp) else ""
     s.update(parse_server_log(lp))
     s.update(parse_metrics(lp.replace("server_", "metrics_").replace(".log", ".txt")))
     return s
@@ -233,18 +267,83 @@ def print_table(rows: list[dict], key: str, cols: list[str], grouped: bool) -> N
         print(" | ".join(c.rjust(w[i]) for i, c in enumerate(l)))
 
 
+def write_std_csv(path: str, rows: list[dict]) -> None:
+    """Standard per-run summary (STD_COLS) in the order the input patterns were given."""
+    with open(path, "w", newline="") as f:
+        wr = csv.DictWriter(f, fieldnames=STD_COLS, extrasaction="ignore")
+        wr.writeheader()
+        for r in rows:
+            wr.writerow({**{k: r.get(k, "") for k in STD_COLS}, "tag": r["std_tag"]})
+
+
+# Load-sweep table: (column, source key, scale, format). Times in explicit units.
+SWEEP_COLS = [
+    ("qps", "qps", None, "{:g}"),
+    ("n_ok", "n_ok", None, "{:d}"),
+    ("wall_s", "wall_s", None, "{:.1f}"),
+    ("goodput_rps", "goodput_rps", 1.0, "{:.6f}"),
+    ("slo_pct", "slo_%", 1.0, "{:.4f}"),
+    ("ttft_p50_s", "ttft_p50", 1e-3, "{:.6f}"),
+    ("ttft_p99_s", "ttft_p99", 1e-3, "{:.6f}"),
+    ("tpot_p50_ms", "tpot_p50", 1.0, "{:.4f}"),
+    ("tpot_p99_ms", "tpot_p99", 1.0, "{:.4f}"),
+    ("maxitl_p99_s", "maxitl_p99", 1e-3, "{:.6f}"),
+    ("retractions", "retracted", None, "{:d}"),
+    ("max_token_usage", "max_usage", 1.0, "{:.2f}"),
+    ("out_tok_s", "out_tok_s", 1.0, "{:.4f}"),
+    ("wait10_reqs", "wait10_reqs", None, "{:d}"),
+    ("stall5_reqs", "stall5_reqs", None, "{:d}"),
+    ("results_file", "file", None, "{}"),
+    ("server_log", "server_log", None, "{}"),
+]
+
+
+def write_sweep_csv(path: str, rows: list[dict]) -> None:
+    """One row per run, sorted by QPS: the load-sweep table with explicit units.
+
+    retractions = sum of `#retracted_reqs` over the run's server log; max_token_usage = largest
+    `token usage` on its Decode/Prefill lines. Runs without a server log are rejected.
+    """
+    missing = [r["file"] for r in rows if not r.get("log")]
+    if missing:
+        sys.exit("no server log for: " + ", ".join(missing))
+    if any(r.get("qps") is None for r in rows):
+        sys.exit("--sweep-csv needs meta.qps in every result file")
+    with open(path, "w", newline="") as f:
+        wr = csv.writer(f, lineterminator="\n")
+        wr.writerow([c for c, *_ in SWEEP_COLS])
+        for r in sorted(rows, key=lambda x: (float(x["qps"]), x["file"])):
+            cells = []
+            for _, key, scale, spec in SWEEP_COLS:
+                v = r.get(key)
+                if scale is not None:
+                    v = v * scale
+                cells.append(spec.format(v))
+            wr.writerow(cells)
+
+
 def main() -> None:
-    ap = argparse.ArgumentParser(description="W3 결과 요약 (클라이언트 + 서버 로그)")
-    ap.add_argument("files", nargs="+")
-    ap.add_argument("--group", action="store_true", help="반복(_rN)을 묶어 중앙값")
-    ap.add_argument("--csv", default=None)
-    ap.add_argument("--cols", default=None, help="보여줄 열 (쉼표 구분)")
+    ap = argparse.ArgumentParser(description="W3 result summary (client results + server logs)")
+    ap.add_argument("files", nargs="+", help="result JSON paths or glob patterns (quote the patterns)")
+    ap.add_argument("--group", action="store_true", help="group repetitions (_rN): median [min-max]")
+    ap.add_argument("--csv", default=None, help="write the printed table (all columns) as CSV")
+    ap.add_argument("--std-csv", default=None,
+                    help="write only the standard summary columns, rows in the order of the patterns")
+    ap.add_argument("--sweep-csv", default=None,
+                    help="write the load-sweep table (qps, goodput, latency percentiles, retractions)")
+    ap.add_argument("--cols", default=None, help="columns to print (comma-separated)")
     args = ap.parse_args()
 
-    paths = sorted({p for pat in args.files for p in glob.glob(pat)})
+    ordered = []                      # pattern order, each pattern sorted (for --std-csv)
+    for pat in args.files:
+        for p in sorted(glob.glob(pat)):
+            if p not in ordered:
+                ordered.append(p)
+    paths = sorted(ordered)
     if not paths:
-        sys.exit("파일을 찾지 못했다. 패턴을 따옴표로 감쌌는지 확인할 것.")
-    rows = [run_row(p) for p in paths]
+        sys.exit("no files found. Did you quote the glob patterns?")
+    by_path = {p: run_row(p) for p in paths}
+    rows = [by_path[p] for p in paths]
     for r in rows:
         r["name"] = cond_of(r) + (("_" + r["tag"].rsplit("_", 1)[1])
                                   if re.search(r"_r\d+$", r["tag"]) else "")
@@ -259,13 +358,18 @@ def main() -> None:
             "retract_events", "mean_running", "kv_pool", "ttft_mean", "retracted_metric",
             "retracted_out_tok"]
     if args.csv:
-        import csv
         with open(args.csv, "w", newline="") as f:
             wr = csv.DictWriter(f, fieldnames=fields, extrasaction="ignore")
             wr.writeheader()
             for r in data:
                 wr.writerow({k: (get(r, k) if k in COLS else r.get(k, "")) for k in fields})
-        print(f"\nCSV 저장: {args.csv}")
+        print(f"\nCSV written: {args.csv}")
+    if args.std_csv:
+        write_std_csv(args.std_csv, [by_path[p] for p in ordered])
+        print(f"\nstandard CSV written: {args.std_csv}")
+    if args.sweep_csv:
+        write_sweep_csv(args.sweep_csv, rows)
+        print(f"\nsweep CSV written: {args.sweep_csv}")
 
 
 if __name__ == "__main__":

@@ -1,39 +1,88 @@
 """
-P3 선택 규칙을 결과에 그대로 적용해 α*, N* 를 고른다 (plan.md 4.3, 결과를 보기 전에 정한 규칙).
+Apply the P3 selection rule to the q2 exploration runs and pick alpha* and N*
+(plan_2026-09-13.md 4.3; the rule was fixed before any result was seen).
 
-  1) 보조 SLO: 모든 요청이 '요청 안 최대 정지 ≤ 5 s' 를 만족 (stall5_reqs == 0)
-  2) 그 가운데 TTFT p99 최소
-  3) 만족하는 설정이 없으면 stall5_reqs 최소 → TTFT p99 최소
+  1) auxiliary SLO: every request keeps its largest in-stream gap <= 5 s (stall5_reqs == 0)
+  2) among those, the lowest TTFT p99
+  3) if no setting satisfies 1), the lowest stall5_reqs, then the lowest TTFT p99
 
-    python -m w3.select_star          # q2 탐색 결과(results/reasoning_q2__{mine_a*,tuned_n*}_r1.json)
+    python3 -m w3.select_star          # from data/derived/w3_runs.csv (no raw data needed)
+    python3 -m w3.select_star --raw    # recompute from results/reasoning_q2__{mine_a*,tuned_n*}_r1.json
 """
 
+import argparse
+import csv
 import glob
 import re
 
-from w3.summarize import run_row
+RUNS_CSV = "data/derived/w3_runs.csv"
+# (result-file pattern for --raw, setting regex): alpha from mine_a<alpha>_r1, N from tuned_n<N>_r1
+SPECS = [("results/reasoning_q2__mine_a*_r1.json", r"mine_a([\d.]+)_r1"),
+         ("results/reasoning_q2__tuned_n*_r1.json", r"tuned_n(\d+)_r1")]
 
 
-def pick(pattern, key_re):
+def rows_from_csv(path: str) -> list[tuple[str, dict]]:
+    """(result file, row) pairs from the per-run table written by w3.summarize --csv."""
+    out = []
+    with open(path, newline="") as fh:
+        for r in csv.DictReader(fh):
+            out.append((r["file"], {
+                "stall5_reqs": int(r["stall5_reqs"]),
+                "ttft_p99": float(r["ttft_p99"]),
+                "retracted": int(r["retracted"]) if r["retracted"] != "" else -1,
+                "goodput_rps": float(r["goodput_rps"]),
+                "maxitl_p99": float(r["maxitl_p99"]),
+            }))
+    return out
+
+
+def rows_from_raw(pattern: str) -> list[tuple[str, dict]]:
+    from w3.summarize import run_row
+    return [(p, run_row(p)) for p in sorted(glob.glob(pattern))]
+
+
+def select(source: list[tuple[str, dict]], key_re: str):
+    """Apply the rule to the q2 runs whose file name matches ``key_re``.
+
+    Returns (rows, selected setting, whether any setting met the auxiliary SLO); rows are
+    (setting, row) pairs sorted by the numeric setting.
+    """
     rows = []
-    for p in sorted(glob.glob(pattern)):
-        m = re.search(key_re + r"\.json$", p)      # mine_a1.0_p16_r1 같은 스모크 실행은 제외
-        if not m:
-            continue
-        rows.append((m.group(1), run_row(p)))
-    print(f"\n{pattern}")
-    print(f"{'설정':>8} {'stall5':>7} {'TTFT p99(s)':>12} {'선점':>5} {'goodput':>8} {'maxITL p99(s)':>14}")
-    for k, r in sorted(rows, key=lambda x: float(x[0])):
-        print(f"{k:>8} {r['stall5_reqs']:>7} {r['ttft_p99']/1000:>12.1f} {r.get('retracted', -1):>5} "
-              f"{r['goodput_rps']:>8.3f} {r['maxitl_p99']/1000:>14.2f}")
+    for p, row in source:
+        m = re.search(r"results/reasoning_q2__" + key_re + r"\.json$", p)   # skips smoke runs such as mine_a1.0_p16_r1
+        if m:
+            rows.append((m.group(1), row))
+    rows.sort(key=lambda x: float(x[0]))
     ok = [x for x in rows if x[1]["stall5_reqs"] == 0]
     pool = ok if ok else rows
     best = min(pool, key=lambda x: (x[1]["stall5_reqs"], x[1]["ttft_p99"]))
-    print(f"=> 선택: {best[0]}  ({'보조 SLO 만족 중 TTFT p99 최소' if ok else '만족 설정 없음 → stall5 최소, TTFT p99 최소'})")
-    return best[0]
+    return rows, best[0], bool(ok)
+
+
+def pick(source: list[tuple[str, dict]], label: str, key_re: str):
+    rows, best, met = select(source, key_re)
+    print(f"\n{label}")
+    print(f"{'setting':>8} {'stall5':>7} {'TTFT p99(s)':>12} {'retr':>5} {'goodput':>8} {'maxITL p99(s)':>14}")
+    for k, r in rows:
+        print(f"{k:>8} {r['stall5_reqs']:>7} {r['ttft_p99']/1000:>12.1f} {r.get('retracted', -1):>5} "
+              f"{r['goodput_rps']:>8.3f} {r['maxitl_p99']/1000:>14.2f}")
+    why = ("lowest TTFT p99 among settings meeting the auxiliary SLO" if met
+           else "no setting meets the auxiliary SLO -> fewest stall5, then lowest TTFT p99")
+    print(f"=> selected: {best}  ({why})")
+    return best
+
+
+def main() -> None:
+    ap = argparse.ArgumentParser(description="pick alpha* and N* with the preregistered P3 rule")
+    ap.add_argument("--raw", action="store_true", help="recompute from results/ instead of " + RUNS_CSV)
+    ap.add_argument("--csv", default=RUNS_CSV, help="per-run table (default: %(default)s)")
+    args = ap.parse_args()
+    picks = []
+    for pattern, key_re in SPECS:
+        source = rows_from_raw(pattern) if args.raw else rows_from_csv(args.csv)
+        picks.append(pick(source, pattern if args.raw else f"{args.csv}: {pattern}", key_re))
+    print(f"\nASTAR={picks[0]} NSTAR={picks[1]}")
 
 
 if __name__ == "__main__":
-    a = pick("results/reasoning_q2__mine_a*_r1.json", r"mine_a([\d.]+)_r1")
-    n = pick("results/reasoning_q2__tuned_n*_r1.json", r"tuned_n(\d+)_r1")
-    print(f"\nASTAR={a} NSTAR={n}")
+    main()
