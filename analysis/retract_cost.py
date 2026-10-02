@@ -1,32 +1,49 @@
 #!/usr/bin/env python3
 """
-retract_cost.py — SGLang retraction(선점) 비용 분석기 (W3 장문 추론)
+retract_cost.py — cost of SGLang retractions (preemption) in the long-reasoning workload (W3)
 
-선점 한 건마다 다음을 서로 대조한다.
-  · 회수한 KV 토큰     서버 로그 `#new_tokens_gained`
-  · 재계산한 토큰      재개 시 다시 prefill 한 토큰 (서버 Prefill 줄 / 클라이언트 추정 / 기준선 대비 초과분)
-  · 시간               피해 요청이 스트리밍 도중 멈춘 시간 (클라이언트 chunk_times), 선점→재계산 지연 (서버 로그)
-그리고 모든 숫자에 "어느 파일 몇 번째 줄 / 몇 번째 레코드에서 나왔는지" 근거를 붙여 보고서로 남긴다.
+For every retraction it lines up three things:
+  · KV tokens freed      server log `#new_tokens_gained`
+  · tokens recomputed    tokens prefilled again on resume (server Prefill line / client estimate /
+                         prefill excess over a run without retractions)
+  · time                 how long the victim's stream stopped (client chunk_times) and the delay from
+                         retraction to re-prefill (server log)
+and writes a report in which every number points to the file and line (log) or record (result file)
+it came from. The report and the terminal tables are in Korean (the language of the original study).
 
-사용법
-    python3 retract_cost.py                       # project 의 results/·logs/ 자동 탐색
-    python3 retract_cost.py --show 30             # 실행별 상세를 30건까지 터미널에 출력
-    python3 retract_cost.py --run q1 results/reasoning_q1__default.json logs/server_q1.log
-    python3 retract_cost.py --stall-sec 3 --out /tmp/rc
+Usage (from the repository root; raw results/ and logs/ from the data-v1 release, see data/RAW.md)
+    python3 -m analysis.retract_cost                      # discover every run in results/*.json
+    python3 -m analysis.retract_cost --show 30            # print up to 30 detail rows per run
+    python3 -m analysis.retract_cost --run q1 results/reasoning_q1__default.json logs/server_q1.log
+    python3 -m analysis.retract_cost --sweep-0907 --out data/derived/retract_cost --force
+                                                          # regenerate the committed 09-07 sweep analysis
+    python3 -m analysis.retract_cost --stall-sec 3 --out retract_cost_out/stall3s
 
-산출물 (--out, 기본: 이 파일 옆 retract_cost_out/ — --run 을 쓰면 retract_cost_out/run_<라벨>/)
-    report.md     요약 표 + 선점 건별 근거 링크 + 계산 방법 + SGLang 소스 근거
-    events.csv    선점 슬롯-피해 요청 한 쌍당 한 줄 (+ 선점과 짝이 없는 정지), 근거 열 포함
-    summary.csv   실행(run)당 한 줄
+    --project DIR    folder that holds results/ and logs/ (default: the repository root)
 
-용어
-  "재생성"이 아니라 "재계산"이다. SGLang 0.5.18 은 선점된 요청이 이미 만든 출력 토큰을 버리지 않고
-  (output_ids 유지) KV 만 버린다. 재개할 때 입력 + 지금까지의 출력을 prefill 로 다시 계산하며,
-  radix 캐시에 남아 있는 앞부분(공유 시스템 프롬프트 등)은 재사용한다. 출력 토큰을 다시 decode 하지 않는다.
+Outputs (--out; default: a new folder retract_cost_out/run_<UTC timestamp>/ under the current
+directory; an existing non-empty --out folder is only overwritten with --force)
+    report.md     summary tables + per-retraction evidence links + method + SGLang source references
+    events.csv    one row per (retraction slot, victim request), plus stalls with no retraction
+    summary.csv   one row per run
+Paths inside the outputs are relative to --project, and nothing depends on the time of the run,
+so the same inputs give byte-identical files.
 
-줄 번호
-  L = VS Code 기준(\\r 도 줄바꿈으로 셈), g = `grep -n` / `sed -n` 기준(\\n 만 셈).
-  서버 로그 앞부분의 CUDA graph 캡처 진행 표시줄에 \\r 이 섞여 있어 두 값이 다르다.
+Without --run/--sweep-0907, server logs are paired with result files by name: w3/run_one.sh
+writes logs/server_<trace>__<tag>.log; the 09-07 sweep wrote logs/server_q<Q>.log; scripts/run_matrix.sh
+of the course harness wrote logs/server_<tag>.log. A candidate is accepted only when its
+modification time is within 15 minutes of the result file (one log = one run), so unpack the raw
+data with its time stamps (tar does this by default).
+
+Terms
+  "Recompute", not "regenerate": SGLang 0.5.18 keeps the output tokens a retracted request has
+  already produced (output_ids) and frees only its KV. On resume it prefills input + output so far
+  again, reusing whatever prefix is still in the radix cache (the shared system prompt); no output
+  token is decoded twice.
+
+Line numbers
+  L = VS Code numbering (\\r also ends a line), g = `grep -n` / `sed -n` numbering (\\n only).
+  They differ because the CUDA graph capture progress bar at the top of a server log contains \\r.
 """
 from __future__ import annotations
 
@@ -42,10 +59,15 @@ import statistics
 import sys
 import unicodedata
 
+from w3 import metrics as w3m   # clean-room client metrics (request_metrics, summarize_run)
+
 HERE = os.path.dirname(os.path.abspath(__file__))
-DEFAULT_PROJECT = "/workspace/inference-engine-study/project"
+DEFAULT_PROJECT = os.path.dirname(HERE)   # repository root (holds results/ and logs/)
 PAIR_MTIME_SEC = 900          # 결과 파일과 서버 로그를 같은 실행으로 볼 수정 시각 차 한도
 EXACT = ("exact-out", "exact-out+prompt")
+# The 09-07 load sweep (unpatched SGLang 0.5.18): label, result file, server log
+SWEEP_0907 = [(f"q{q}", f"results/reasoning_q{q}__default.json", f"logs/server_q{q}.log")
+              for q in ("0.5", "0.6", "0.8", "1", "2", "4", "8")]
 
 # [YYYY-mm-dd HH:MM:SS(.mmm)( TP0 DP0 …)] — SGLang 로거 형식 (SGLANG_LOG_MS, TP/DP 접두어 포함)
 RX_TS = re.compile(r"^\[(\d{4}-\d\d-\d\d \d\d:\d\d:\d\d)(?:[.,](\d{1,6}))?((?: [A-Za-z_]+\d+)*)\]")
@@ -131,17 +153,13 @@ def parse_log(path):
     return dict(events=events, prefills=prefills, info=info)
 
 
-def load_results(path, stall_sec, project):
-    if project not in sys.path:
-        sys.path.insert(0, project)
-    sys.dont_write_bytecode = True    # 분석기는 project 폴더에 아무것도 쓰지 않는다
-    from bench.metrics import per_request, summarize  # 공식 지표 정의를 그대로 쓴다
-
-    blob = json.load(open(path))
+def load_results(path, stall_sec):
+    with open(path) as fh:
+        blob = json.load(fh)
     recs = blob["records"]
     stalls, per = [], {}
     for idx, r in enumerate(recs):
-        per[r["rid"]] = per_request(r)
+        per[r["rid"]] = w3m.request_metrics(r)
         ct, ck = r.get("chunk_times") or [], r.get("chunk_tokens") or []
         cum = 0
         for i in range(1, len(ct)):
@@ -157,7 +175,7 @@ def load_results(path, stall_sec, project):
     good = [p for p in per.values() if "ttft_ms" in p]
     totals = dict(prompt=sum(p["prompt_tokens"] for p in good),
                   output=sum(p["completion_tokens"] for p in good))
-    sm = summarize(blob)
+    sm = w3m.summarize_run(blob)
     return dict(blob=blob, recs=recs, stalls=stalls, per=per, summary=sm, totals=totals,
                 n=len(recs), n_ok=sm.get("n_ok", 0))
 
@@ -320,8 +338,9 @@ def discover(project):
         name = ((f"q{mq.group(1)}" if root == "reasoning" else f"{root}-q{mq.group(1)}") if mq
                 else ("" if root == "reasoning" else root))
         label = (name if tag == "default" else f"{name}-{tag}") if name else tag
-        # 로그 후보: 스윕 이름(server_q<Q>.log)은 default 결과에만, run_matrix 이름(server_<tag>.log)은 공통
-        cands = []
+        # Log candidates, most specific first: w3/run_one.sh name (server_<trace>__<tag>.log, errata C6),
+        # the 09-07 sweep name (server_q<Q>.log, default results only), the run_matrix name (server_<tag>.log).
+        cands = [os.path.join(project, "logs", f"server_{stem}__{tag}.log")]
         if mq and tag == "default":
             cands.append(os.path.join(project, "logs", f"server_q{mq.group(1)}.log"))
         cands.append(os.path.join(project, "logs", f"server_{tag}.log"))
@@ -376,55 +395,72 @@ def resolve_path(x, project):
 
 
 # ----------------------------------------------------------------------------
-# SGLang · project 소스 근거 (설치된 버전에서 실제 줄 번호를 매번 다시 찾는다)
+# Source references for report section 4. The line numbers are pinned to the versions that
+# produced the data and are linked as GitHub permalinks, so the report does not depend on what
+# is installed on the machine that runs this script:
+#   SGLang v0.5.18 (checked against sglang-0.5.18-cp312 wheel, sha256 fba7bb31...),
+#   course harness commit 802a164 (linked only; its code is not part of this repository).
+# An SGLang source tree (--sglang-src, or an importable sglang) is used only to re-check the
+# pinned SGLang lines; mismatches are printed on the terminal.
 # ----------------------------------------------------------------------------
-SRC_REFS = [
-    ("선점 실행", "srt/managers/scheduler.py", r"batch\.retract_decode\("),
+SGLANG_URL = "https://github.com/sgl-project/sglang/blob/v0.5.18/python/sglang/"
+COURSE_URL = ("https://github.com/mlleo/inference-engine-study/blob/"
+              "802a1642fcefc06735a89af054213c9904b4ff45/project/")
+SRC_REFS = [   # (label, path under python/sglang/, regex, line in v0.5.18)
+    ("선점 실행", "srt/managers/scheduler.py", r"batch\.retract_decode\(", 3504),
     ("#new_tokens_gained = 선점 전후 빈 KV 슬롯 수 차이", "srt/managers/scheduler.py",
-     r"new_token_gained = new_available_tokens - old_available_tokens"),
-    ("선점 로그 문구", "srt/managers/scheduler.py", r"KV cache pool is full\. Retract requests"),
-    ("선점된 요청을 대기열에 다시 넣음", "srt/managers/scheduler.py", r"_add_request_to_queue\(req, is_retracted=True\)"),
-    ("대기열 맨 뒤에 추가", "srt/managers/scheduler.py", r"self\.waiting_queue\.append\(req\)"),
-    ("fcfs 는 대기열을 재정렬하지 않음", "srt/managers/schedule_policy.py", r"if self\.policy == CacheAgnosticPolicy\.FCFS:"),
+     r"new_token_gained = new_available_tokens - old_available_tokens", 3508),
+    ("선점 로그 문구", "srt/managers/scheduler.py", r"KV cache pool is full\. Retract requests", 3538),
+    ("선점된 요청을 대기열에 다시 넣음", "srt/managers/scheduler.py", r"_add_request_to_queue\(req, is_retracted=True\)",
+     3552),
+    ("대기열 맨 뒤에 추가", "srt/managers/scheduler.py", r"self\.waiting_queue\.append\(req\)", 2725),
+    ("fcfs 는 대기열을 재정렬하지 않음", "srt/managers/schedule_policy.py",
+     r"if self\.policy == CacheAgnosticPolicy\.FCFS:", 254),
     ("선점 요청 KV 를 radix 캐시에 넣지 않고 해제", "srt/managers/schedule_batch.py",
-     r"release_kv_cache\(req, tree_cache, is_insert=False\)"),
+     r"release_kv_cache\(req, tree_cache, is_insert=False\)", 1934),
     ("선점 뒤에도 output_ids 유지 — input_embeds 요청만 비운다(주석)", "srt/managers/schedule_batch.py",
-     r"we discard the generated output_ids and restart prefill"),
+     r"we discard the generated output_ids and restart prefill", 1709),
     ("prefill 입력 = origin_input_ids + output_ids (불변식)", "srt/managers/schedule_batch.py",
-     r"Keep full_untruncated_fill_ids == origin_input_ids \+ output_ids"),
+     r"Keep full_untruncated_fill_ids == origin_input_ids \+ output_ids", 1272),
     ("재개 시 새 출력만 이어 붙이는 경로", "srt/managers/schedule_batch.py",
-     r"self\.full_untruncated_fill_ids\.extend\(self\.output_ids\[n_have_output:\]\)"),
-    ("선점 순서 (생성 토큰이 적은 요청부터)", "srt/managers/schedule_batch.py", r"def _get_decode_retraction_order"),
+     r"self\.full_untruncated_fill_ids\.extend\(self\.output_ids\[n_have_output:\]\)", 1288),
+    ("선점 순서 (생성 토큰이 적은 요청부터)", "srt/managers/schedule_batch.py", r"def _get_decode_retraction_order",
+     2867),
     ("SGLang 자체 재계산 집계: 선점됐던 요청의 재prefill 토큰", "srt/managers/schedule_policy.py",
-     r"self\.reprocessed_log_input_tokens \+= extend_input_len"),
+     r"self\.reprocessed_log_input_tokens \+= extend_input_len", 904),
     ("재계산 = realtime_tokens_total{mode=prefill_compute} − prefill_effective_tokens_total{mode=input}",
-     "srt/observability/metrics_collector.py", r'name="sglang:prefill_effective_tokens_total"'),
+     "srt/observability/metrics_collector.py", r'name="sglang:prefill_effective_tokens_total"', 893),
     ("num_retracted_input_tokens_total = 선점 시점 요청의 입력 길이 합 (재계산량 아님)",
-     "srt/observability/metrics_collector.py", r"num_retracted_input_tokens_total = Counter"),
-    ("응답 meta_info 의 요청별 선점 횟수", "srt/managers/tokenizer_manager.py", r'"num_retractions": recv_obj\.retraction_counts'),
+     "srt/observability/metrics_collector.py", r"num_retracted_input_tokens_total = Counter", 467),
+    ("응답 meta_info 의 요청별 선점 횟수", "srt/managers/tokenizer_manager.py",
+     r'"num_retractions": recv_obj\.retraction_counts', 2246),
 ]
-PROJ_REFS = [
-    ("replay 는 rid 를 서버에 보내지 않음", "bench/replay.py", r'payload = \{"text": prompt'),
-    ("chunk_times 를 t0 기준 상대 시각으로 저장", "bench/replay.py", r'd\["chunk_times"\] = \[round\(t - t0'),
-    ("t0 = perf_counter (벽시계 아님)", "bench/replay.py", r"t0 = time\.perf_counter\(\)"),
-    ("TPOT 정의 (첫 토큰 이후 평균)", "bench/metrics.py", r'out\["tpot_ms"\] ='),
-    ("W3 SLO: TPOT ≤ 60 ms", "workloads/generators.py", r"tpot_slo_ms=60"),
+COURSE_REFS = [   # (label, path under project/, line at 802a164)
+    ("replay 는 rid 를 서버에 보내지 않음", "bench/replay.py", 79),
+    ("chunk_times 를 t0 기준 상대 시각으로 저장", "bench/replay.py", 58),
+    ("t0 = perf_counter (벽시계 아님)", "bench/replay.py", 135),
+    ("W3 SLO: TPOT ≤ 60 ms", "workloads/generators.py", 161),
+]
+REPO_REFS = [   # (label, path in this repository) — linked without a line number
+    ("TPOT 정의 (첫 토큰 이후 평균): request_metrics", "w3/metrics.py"),
 ]
 
 
-def find_refs(root, refs):
-    out = []
-    for label, rel, rx in refs:
-        path = os.path.join(root, rel) if root else rel
-        line = None
-        if root and os.path.exists(path):
-            with open(path, encoding="utf-8", errors="replace") as fh:
-                for i, t in enumerate(fh, 1):
-                    if re.search(rx, t):
-                        line = i
-                        break
-        out.append((label, path, line))
-    return out
+def find_line(path, rx):
+    """First line (1-based) of ``path`` matching ``rx``; None when the file or the match is missing."""
+    if not os.path.exists(path):
+        return None
+    with open(path, encoding="utf-8", errors="replace") as fh:
+        for i, t in enumerate(fh, 1):
+            if re.search(rx, t):
+                return i
+    return None
+
+
+def check_sglang_refs(root):
+    """Compare the pinned SGLang lines with a source tree: [(label, rel, pinned, found)] mismatches."""
+    return [(label, rel, line, found) for label, rel, rx, line in SRC_REFS
+            if (found := find_line(os.path.join(root, rel), rx)) != line]
 
 
 def sglang_root(explicit):
@@ -504,8 +540,8 @@ def slo_mark(pr):
 # ----------------------------------------------------------------------------
 # 분석 본체
 # ----------------------------------------------------------------------------
-def analyze_run(run, project, stall_sec, tol):
-    res = load_results(run["results"], stall_sec, project)
+def analyze_run(run, stall_sec, tol):
+    res = load_results(run["results"], stall_sec)
     a = dict(run=run, res=res, log=None, rows=[], offset=None, offset_how=None, unmatched_stalls=[])
     if run["log"]:
         log = parse_log(run["log"])
@@ -630,20 +666,30 @@ def ub_text(s):
 # ----------------------------------------------------------------------------
 def main():
     ap = argparse.ArgumentParser(description="SGLang retraction 비용 분석 + 근거 보고서")
-    ap.add_argument("--project", default=DEFAULT_PROJECT, help="inference-engine-study/project 경로")
+    ap.add_argument("--project", default=DEFAULT_PROJECT,
+                    help="folder that holds results/ and logs/ (default: the repository root)")
     ap.add_argument("--run", nargs="+", action="append", metavar="ARG",
                     help="LABEL RESULTS.json [SERVER.log] — 여러 번 지정 가능. 상대 경로는 현재 폴더에 있으면 그것, "
                          "없으면 --project 기준. 없으면 자동 탐색")
+    ap.add_argument("--sweep-0907", action="store_true",
+                    help="analyse the 09-07 load sweep: q0.5..q8 with logs/server_q<Q>.log (same as 7 --run)")
     ap.add_argument("--stall-sec", type=float, default=5.0, help="이 시간(초)보다 긴 토큰 간격을 정지로 본다")
     ap.add_argument("--tol", type=float, default=2.5, help="서버 선점 시각 ↔ 클라이언트 정지 시작 허용 오차(초)")
     ap.add_argument("--baseline", default=None, help="prefill 초과분 기준선 실행 라벨 (기본: 조건이 맞는 선점 0건 실행)")
-    ap.add_argument("--sglang-src", default=None, help="SGLang 파이썬 패키지 경로 (기본: 설치된 sglang)")
+    ap.add_argument("--sglang-src", default=None,
+                    help="SGLang package folder used to re-check the pinned v0.5.18 source lines "
+                         "(default: the installed sglang, if any); the report always links v0.5.18")
     ap.add_argument("--show", type=int, default=8, help="실행별 상세를 터미널에 몇 건까지 보일지")
     ap.add_argument("--out", default=None,
-                    help="보고서 출력 폴더 (기본: retract_cost_out/, --run 을 쓰면 retract_cost_out/run_<라벨>/)")
+                    help="output folder (default: a new retract_cost_out/run_<UTC timestamp>/ in the current folder)")
+    ap.add_argument("--force", action="store_true", help="allow writing into an existing non-empty --out folder")
     args = ap.parse_args()
 
     project = os.path.abspath(args.project)
+    if args.sweep_0907 and args.run:
+        ap.error("--sweep-0907 and --run cannot be combined")
+    if args.sweep_0907:
+        args.run = [[label, res, log] for label, res, log in SWEEP_0907]
     if args.run:
         runs = []
         for spec in args.run:
@@ -653,25 +699,31 @@ def main():
             for p in paths:
                 if not os.path.exists(p):
                     ap.error(f"파일이 없다: {p}")
+            note = ("--sweep-0907 (09-07 스윕 로그 이름 server_q<Q>.log)" if args.sweep_0907
+                    else "--run 으로 지정")
             runs.append(dict(label=spec[0], results=paths[0], log=paths[1] if len(paths) == 2 else None,
-                             pair_note="--run 으로 지정"))
+                             pair_note=note))
         if len({r["label"] for r in runs}) != len(runs):
             ap.error("--run 라벨이 겹친다")
     else:
         runs = discover(project)
     if not runs:
         sys.exit(f"결과 파일을 찾지 못했다: {project}/results/*.json")
+    # Errata C6/C7: never overwrite earlier outputs by default.
     if args.out:
         out_dir = args.out
-    elif args.run:
-        out_dir = os.path.join(HERE, "retract_cost_out",
-                               "run_" + "_".join(re.sub(r"[^\w.-]", "_", r["label"]) for r in runs))
     else:
-        out_dir = os.path.join(HERE, "retract_cost_out")
+        stamp = dt.datetime.now(dt.timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+        out_dir = os.path.join("retract_cost_out", f"run_{stamp}")
+    if os.path.isdir(out_dir) and os.listdir(out_dir) and not args.force:
+        sys.exit(f"{out_dir} already has files; pass --force to overwrite them, or choose another --out")
 
-    analyses = [analyze_run(r, project, args.stall_sec, args.tol) for r in runs]
+    analyses = [analyze_run(r, args.stall_sec, args.tol) for r in runs]
     assign_baselines(analyses, args.baseline)
     sums = [summarize_run(a) for a in analyses]
+    disp = lambda p: os.path.relpath(p, project) if p else ""   # paths in the outputs: relative to --project
+    for s in sums:
+        s["results"], s["log"] = disp(s["results"]), disp(s["log"])
 
     # ------------------------------------------------------------------ 터미널
     print("=" * 100)
@@ -745,10 +797,10 @@ def main():
                 e, st_, rp, pr = r["e"], r["s"], r["rp"], r["pr"] or {}
                 tp = pr.get("tpot_ms")
                 w.writerow([
-                    s["label"], r["eid"] or "", r["slot"] or "", a["run"]["log"] or "",
+                    s["label"], r["eid"] or "", r["slot"] or "", disp(a["run"]["log"]),
                     e["L"] if e else "", e["g"] if e else "", hhmmss(e["ts"]) if e else "", e["k"] if e else "",
                     e["gained"] if e else "", e["ratio"] if e else "",
-                    a["run"]["results"], st_["idx"] if st_ else "", st_["rid"] if st_ else "",
+                    disp(a["run"]["results"]), st_["idx"] if st_ else "", st_["rid"] if st_ else "",
                     st_["chunk"] if st_ else "", f"{st_['t_start']:.3f}" if st_ else "", f"{st_['dur']:.3f}" if st_ else "",
                     st_["before"] if st_ else "", st_["prompt"] if st_ else "", st_["cached"] if st_ else "",
                     e["gained"] if (e and r["slot"] == 1) else "",
@@ -769,6 +821,12 @@ def main():
     print("\n산출물")
     for p in (rp_path, ev_path, sm_path):
         print(f"  {p}")
+    sg = sglang_root(args.sglang_src)
+    if sg:   # terminal-only check of the pinned v0.5.18 line numbers used in report section 4
+        bad = check_sglang_refs(sg)
+        print(f"\nSGLang source lines ({sg}): {len(SRC_REFS) - len(bad)}/{len(SRC_REFS)} match the pinned v0.5.18 lines")
+        for label, rel_, pinned, found in bad:
+            print(f"  ! {rel_}: pinned {pinned}, found {found} — {label}")
     print("\n줄 번호: L = VS Code 기준, g = grep -n / sed -n 기준 (로그의 \\r 때문에 다르다). 시각은 로그에 적힌 그대로.")
 
 
@@ -776,12 +834,26 @@ def write_report(path, args, project, analyses, sums):
     rd = os.path.dirname(path)
     rel = lambda p: os.path.relpath(p, rd)
     link = lambda p, line: mdlink(f"L{line}", f"{rel(p)}#L{line}")
-    sg = sglang_root(args.sglang_src)
     L = []
     L.append("# Retraction 비용 분석 보고서\n")
-    L.append(f"- 생성: {dt.datetime.now().strftime('%Y-%m-%d %H:%M:%S')} · 명령: `python3 {' '.join(sys.argv)}`")
-    L.append(f"- project: `{project}` · 정지 기준: 토큰 간격 > {args.stall_sec:g}s · 매칭 허용 오차 ±{args.tol:g}s")
-    L.append("- 줄 번호 링크는 VS Code 기준(L). 괄호 안 g 는 `grep -n` 기준. 시각은 로그에 적힌 그대로.\n")
+    # No time stamp and no absolute path: the same inputs and arguments give a byte-identical report.
+    # Options that do not change the files (--force, --show, --sglang-src) are left out of the command.
+    shown, skip = [], 0
+    for x in sys.argv[1:]:
+        if skip:
+            skip -= 1
+        elif x == "--force":
+            pass
+        elif x in ("--show", "--sglang-src"):
+            skip = 1
+        elif not x.startswith(("--show=", "--sglang-src=")):
+            shown.append(x)
+    L.append(f"- 명령: `python3 -m analysis.retract_cost {' '.join(shown)}`")
+    L.append(f"- project: `{os.path.relpath(project)}` (실행 폴더 기준) · "
+             f"정지 기준: 토큰 간격 > {args.stall_sec:g}s · 매칭 허용 오차 ±{args.tol:g}s")
+    L.append("- 줄 번호 링크는 VS Code 기준(L). 괄호 안 g 는 `grep -n` 기준. 시각은 로그에 적힌 그대로.")
+    L.append("- 결과·로그 링크는 project 폴더 기준 상대 경로다. 이 저장소에서는 원시 데이터(data/RAW.md)를 "
+             "저장소 루트에 풀어야 열린다.\n")
 
     L.append("## 1. 요약\n")
     L.append("### 토큰 — 회수한 KV vs 재계산\n")
@@ -824,8 +896,8 @@ def write_report(path, args, project, analyses, sums):
                "그다음 모든 (선점, 정지) 후보를 토큰 일치 등급 → 시각 오차 순으로 전역 배정한다. "
                "'정확' = 회수 KV 가 정지 전 생성 토큰(+ 공유 안 된 입력분)과 같음, '근사' = ±2 토큰", "두 출처 대조"],
         ["선점→재계산", "선점 줄 시각 → 확인된 재계산 줄 시각 (로그 시각이 1초 단위라 ±1s)", "서버 로그"],
-        ["피해 요청 SLO 위반", "선점된 요청 중 TPOT > SLO(60 ms) 인 수 / 선점된 요청 수 (오류 요청 제외)", "`bench.metrics.per_request`"],
-        ["maxITL · TTFT · out tok/s · goodput", "`bench.metrics.summarize` 와 같은 정의", "클라이언트 결과 파일"],
+        ["피해 요청 SLO 위반", "선점된 요청 중 TPOT > SLO(60 ms) 인 수 / 선점된 요청 수 (오류 요청 제외)", "`w3.metrics.request_metrics`"],
+        ["maxITL · TTFT · out tok/s · goodput", "`w3.metrics.summarize_run` 정의", "클라이언트 결과 파일"],
     ]))
     L.append("\n'재생성'이 아니라 **재계산**이다. 선점된 요청이 이미 만든 출력 토큰은 유지되고(`output_ids`), 버려지는 것은 KV 뿐이다. "
              "재개할 때 입력 + 지금까지의 출력을 prefill 로 다시 계산하며, radix 캐시에 남은 앞부분은 재사용한다.\n")
@@ -888,12 +960,13 @@ def write_report(path, args, project, analyses, sums):
         L.append("")
 
     L.append("## 4. 계산의 근거가 된 소스 위치\n")
-    L.append(f"SGLang 경로: `{sg or '찾지 못함 (--sglang-src 로 지정)'}` — 실행할 때마다 실제 줄 번호를 다시 찾는다.\n")
-    rows = []
-    for label, p, line in find_refs(sg, SRC_REFS) + find_refs(project, PROJ_REFS):
-        tgt = p if os.path.isabs(p) else rel(p)
-        rows.append([label, mdlink(f"{os.path.basename(p)}:{line}", f"{tgt}#L{line}") if line
-                     else f"`{os.path.basename(p)}` — 찾지 못함 (버전이 다를 수 있음)"])
+    L.append("측정에 쓴 버전에 고정한 줄 번호다: SGLang v0.5.18(GitHub 태그) · 과정 하니스 커밋 802a164(링크만, "
+             "이 저장소에는 없음) · 이 저장소의 지표 정의.\n")
+    rows = [[label, mdlink(f"{os.path.basename(rel_)}:{line}", f"{SGLANG_URL}{rel_}#L{line}")]
+            for label, rel_, _, line in SRC_REFS]
+    rows += [[label, mdlink(f"{os.path.basename(rel_)}:{line}", f"{COURSE_URL}{rel_}#L{line}")]
+             for label, rel_, line in COURSE_REFS]
+    rows += [[label, mdlink(rel_, rel(os.path.join(DEFAULT_PROJECT, rel_)))] for label, rel_ in REPO_REFS]
     L.append(md_table(["근거", "위치"], rows))
 
     L.append("\n## 5. 한계\n")
