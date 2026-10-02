@@ -31,6 +31,7 @@ PY
   fi
   # shellcheck disable=SC2086
   bash w3/run_one.sh "$TRACE" "$OUT" "$TAG" $FLAGS < /dev/null >> "$QLOG" 2>&1
-  echo "[$(date '+%F %T')] rc=$? $RES" | tee -a "$QLOG"
+  RC=$?   # save now: inside the echo below, $? would be read after $(date) and always be 0
+  echo "[$(date '+%F %T')] rc=$RC $RES" | tee -a "$QLOG"
 done < "$Q"
 echo "[$(date '+%F %T')] 큐 끝: $Q" | tee -a "$QLOG"
