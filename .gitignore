@@ -17,3 +17,5 @@ __pycache__/
 *.pdf
 jupyter*.log
 .env
+# Default output folder of `python3 -m analysis.retract_cost` (without --out)
+retract_cost_out/

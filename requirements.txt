@@ -1,0 +1,10 @@
+# Python 3.12. Install with: python3 -m pip install -r requirements.txt
+#
+# Used by the analysis scripts (w3/, analysis/):
+numpy==2.1.2
+
+# Optional, figures only (python3 -m w3.figures):
+# matplotlib==3.11.2
+
+# The CPU tests (tests/) and the scripts in tools/ use the Python standard
+# library only and need nothing from this file.
